@@ -1,0 +1,41 @@
+// dictionaryString:dictionaryValue
+
+// Obstacle
+greenHueMin:90
+greenHueMax:115
+greenSatMin:0.3
+greenSatMax:1.0
+greenLumMin:0.15
+greenLumMax:1.0
+
+// Predator/Prey
+redHueMin:355
+redHueMax:20
+redSatMin:0.5
+redSatMax:1.0
+redLumMin:0.15
+redLumMax:1.0
+
+// Line along walls
+blueHueMin:180
+blueHueMax:240
+blueSatMin:0.1
+blueSatMax:1.0
+blueLumMin:0.1
+blueLumMax:0.7
+
+// North & south walls
+yellowHueMin:25
+yellowHueMax:80
+yellowSatMin:0.2
+yellowSatMax:0.9
+yellowLumMin:0.25
+yellowLumMax:0.8
+
+// West & east walls
+whiteHueMin:181
+whiteHueMax:180
+whiteSatMin:0.0
+whiteSatMax:0.52
+whiteLumMin:0.50
+whiteLumMax:0.9

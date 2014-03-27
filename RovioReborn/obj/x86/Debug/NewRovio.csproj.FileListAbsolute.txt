@@ -1,0 +1,15 @@
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\NewRovio.Properties.Resources.resources
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\Workshop_2___Forms.ImageViewer.resources
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\bin\Debug\AForge.dll
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\bin\Debug\AForge.Imaging.dll
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\bin\Debug\AForge.Imaging.xml
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\bin\Debug\Rovio.exe
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\bin\Debug\Rovio.pdb
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\Rovio.exe
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\Rovio.pdb
+G:\NewRovio\NewRovio\obj\x86\Debug\Rovio.exe
+G:\NewRovio\NewRovio\obj\x86\Debug\Rovio.pdb
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\NewRovio.csprojResolveAssemblyReference.cache
+C:\Users\LABC19\Desktop\NewRovio\NewRovio\obj\x86\Debug\NewRovio.csproj.GenerateResource.Cache
+C:\Users\jordan-14100\Desktop\NewRovio\NewRovio\obj\x86\Debug\Rovio.exe
+C:\Users\jordan-14100\Desktop\NewRovio\NewRovio\obj\x86\Debug\Rovio.pdb

@@ -32,16 +32,18 @@
             this.picboxCameraImage = new System.Windows.Forms.PictureBox();
             this.buttonPredator = new System.Windows.Forms.Button();
             this.buttonUser = new System.Windows.Forms.Button();
-            this.labelHue = new System.Windows.Forms.Label();
-            this.labelSat = new System.Windows.Forms.Label();
-            this.labelLum = new System.Windows.Forms.Label();
             this.labelDocked = new System.Windows.Forms.Label();
             this.updateTimer = new System.Windows.Forms.Timer(this.components);
-            this.labelBattery = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.labelDirection = new System.Windows.Forms.Label();
             this.labelDirectionLabel = new System.Windows.Forms.Label();
+            this.textBoxIP = new System.Windows.Forms.TextBox();
+            this.buttonStop = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.labelBattery = new System.Windows.Forms.Label();
+            this.labelLum = new System.Windows.Forms.Label();
+            this.labelSat = new System.Windows.Forms.Label();
+            this.labelHue = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.picboxCameraImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,33 +75,6 @@
             this.buttonUser.UseVisualStyleBackColor = true;
             this.buttonUser.Click += new System.EventHandler(this.buttonUser_Click);
             // 
-            // labelHue
-            // 
-            this.labelHue.AutoSize = true;
-            this.labelHue.Location = new System.Drawing.Point(384, 83);
-            this.labelHue.Name = "labelHue";
-            this.labelHue.Size = new System.Drawing.Size(51, 13);
-            this.labelHue.TabIndex = 3;
-            this.labelHue.Text = "Hue (r, v)";
-            // 
-            // labelSat
-            // 
-            this.labelSat.AutoSize = true;
-            this.labelSat.Location = new System.Drawing.Point(384, 105);
-            this.labelSat.Name = "labelSat";
-            this.labelSat.Size = new System.Drawing.Size(73, 13);
-            this.labelSat.TabIndex = 4;
-            this.labelSat.Text = "Sat (min, max)";
-            // 
-            // labelLum
-            // 
-            this.labelLum.AutoSize = true;
-            this.labelLum.Location = new System.Drawing.Point(384, 129);
-            this.labelLum.Name = "labelLum";
-            this.labelLum.Size = new System.Drawing.Size(77, 13);
-            this.labelLum.TabIndex = 5;
-            this.labelLum.Text = "Lum (min, max)";
-            // 
             // labelDocked
             // 
             this.labelDocked.AutoSize = true;
@@ -114,15 +89,6 @@
             this.updateTimer.Interval = 500;
             this.updateTimer.Tick += new System.EventHandler(this.updateTimer_Tick);
             // 
-            // labelBattery
-            // 
-            this.labelBattery.AutoSize = true;
-            this.labelBattery.Location = new System.Drawing.Point(252, 364);
-            this.labelBattery.Name = "labelBattery";
-            this.labelBattery.Size = new System.Drawing.Size(62, 13);
-            this.labelBattery.TabIndex = 7;
-            this.labelBattery.Text = "labelBattery";
-            // 
             // label6
             // 
             this.label6.AutoSize = true;
@@ -132,16 +98,6 @@
             this.label6.Size = new System.Drawing.Size(47, 13);
             this.label6.TabIndex = 8;
             this.label6.Text = "Status:";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(195, 364);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(51, 13);
-            this.label7.TabIndex = 9;
-            this.label7.Text = "Charge:";
             // 
             // labelDirection
             // 
@@ -162,11 +118,80 @@
             this.labelDirectionLabel.TabIndex = 11;
             this.labelDirectionLabel.Text = "Direction:";
             // 
+            // textBoxIP
+            // 
+            this.textBoxIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxIP.ForeColor = System.Drawing.SystemColors.ActiveCaption;
+            this.textBoxIP.Location = new System.Drawing.Point(340, 364);
+            this.textBoxIP.Name = "textBoxIP";
+            this.textBoxIP.Size = new System.Drawing.Size(123, 20);
+            this.textBoxIP.TabIndex = 12;
+            this.textBoxIP.Text = "http://10.82.0.41";
+            this.textBoxIP.TextChanged += new System.EventHandler(this.textBoxIP_TextChanged);
+            // 
+            // buttonStop
+            // 
+            this.buttonStop.Location = new System.Drawing.Point(197, 361);
+            this.buttonStop.Name = "buttonStop";
+            this.buttonStop.Size = new System.Drawing.Size(137, 23);
+            this.buttonStop.TabIndex = 13;
+            this.buttonStop.Text = "Stop";
+            this.buttonStop.UseVisualStyleBackColor = true;
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(384, 180);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(51, 13);
+            this.label7.TabIndex = 9;
+            this.label7.Text = "Charge:";
+            // 
+            // labelBattery
+            // 
+            this.labelBattery.AutoSize = true;
+            this.labelBattery.Location = new System.Drawing.Point(384, 155);
+            this.labelBattery.Name = "labelBattery";
+            this.labelBattery.Size = new System.Drawing.Size(62, 13);
+            this.labelBattery.TabIndex = 7;
+            this.labelBattery.Text = "labelBattery";
+            // 
+            // labelLum
+            // 
+            this.labelLum.AutoSize = true;
+            this.labelLum.Location = new System.Drawing.Point(384, 129);
+            this.labelLum.Name = "labelLum";
+            this.labelLum.Size = new System.Drawing.Size(77, 13);
+            this.labelLum.TabIndex = 5;
+            this.labelLum.Text = "Lum (min, max)";
+            // 
+            // labelSat
+            // 
+            this.labelSat.AutoSize = true;
+            this.labelSat.Location = new System.Drawing.Point(384, 105);
+            this.labelSat.Name = "labelSat";
+            this.labelSat.Size = new System.Drawing.Size(73, 13);
+            this.labelSat.TabIndex = 4;
+            this.labelSat.Text = "Sat (min, max)";
+            // 
+            // labelHue
+            // 
+            this.labelHue.AutoSize = true;
+            this.labelHue.Location = new System.Drawing.Point(384, 83);
+            this.labelHue.Name = "labelHue";
+            this.labelHue.Size = new System.Drawing.Size(51, 13);
+            this.labelHue.TabIndex = 3;
+            this.labelHue.Text = "Hue (r, v)";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(767, 396);
+            this.Controls.Add(this.buttonStop);
+            this.Controls.Add(this.textBoxIP);
             this.Controls.Add(this.labelDirectionLabel);
             this.Controls.Add(this.labelDirection);
             this.Controls.Add(this.label7);
@@ -197,15 +222,17 @@
         private System.Windows.Forms.PictureBox picboxCameraImage;
         private System.Windows.Forms.Button buttonPredator;
         private System.Windows.Forms.Button buttonUser;
-        private System.Windows.Forms.Label labelHue;
-        private System.Windows.Forms.Label labelSat;
-        private System.Windows.Forms.Label labelLum;
         private System.Windows.Forms.Label labelDocked;
         private System.Windows.Forms.Timer updateTimer;
-        private System.Windows.Forms.Label labelBattery;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label labelDirection;
         private System.Windows.Forms.Label labelDirectionLabel;
+        private System.Windows.Forms.TextBox textBoxIP;
+        private System.Windows.Forms.Button buttonStop;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label labelBattery;
+        private System.Windows.Forms.Label labelLum;
+        private System.Windows.Forms.Label labelSat;
+        private System.Windows.Forms.Label labelHue;
     }
 }

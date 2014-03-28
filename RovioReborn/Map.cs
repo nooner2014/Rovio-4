@@ -13,16 +13,25 @@ namespace PredatorPreyAssignment
 {
     class Map
     {
+
+        enum Type
+        { 
+            Prey,
+            Obstacle,
+            Other,
+        }
         Rovio.BaseRobot robot;
 
         // Different picturebox for each image element, with accompanying bitmap.
         private PictureBox picBoxMap;
+        private PictureBox picBoxPath;
         private PictureBox picBoxRovio;
         private PictureBox picBoxPrey;
         private PictureBox picBoxObstacle;
         private PictureBox picBoxBayes;
         private PictureBox picBoxCone;
         private Bitmap bMap;
+        private Bitmap bPath;
         private Bitmap bRovio;
         private Bitmap bObstacle;
         private Bitmap bPrey;
@@ -30,6 +39,7 @@ namespace PredatorPreyAssignment
         private Bitmap bCone;
 
         // 2D arrays for different maps
+        private bool[,] finalMap;
         private bool[,] preySensor;
         private double[,] preyProbability;
         private bool[,] obstacleSensor;
@@ -53,6 +63,7 @@ namespace PredatorPreyAssignment
             robot = r;
             maxY = 300 / 10;
             maxX = 260 / 10;
+            finalMap = new bool[maxX, maxY];
             isCellVisible = new bool[maxX, maxY];
             preySensor = new bool[maxX, maxY];
             preyProbability = new double[maxX, maxY]; 
@@ -62,6 +73,7 @@ namespace PredatorPreyAssignment
             {
                 for (int j = 0; j < maxY; j++)
                 {
+                    finalMap[i, j] = false;
                     preyProbability[i, j] = 0.5;
                     obstacleProbability[i, j] = 0.5;
                     isCellVisible[i, j] = false;
@@ -70,12 +82,17 @@ namespace PredatorPreyAssignment
                 }
             }
 
+            
             SetPictureBox(c, ref picBoxBayes, ref bBayes, 260, 300, 0, 0);
+            
             SetPictureBox(c, ref picBoxObstacle, ref bObstacle, 30, 30, -100, -100);
             SetPictureBox(c, ref picBoxPrey, ref bPrey, 3, 3, -100, -100);
             SetPictureBox(c, ref picBoxRovio, ref bRovio, 24, 27, -100, -100);
             SetPictureBox(c, ref picBoxCone, ref bCone, 138, 150, -500, -500);
+
+            SetPictureBox(c, ref picBoxPath, ref bPath, 260, 300, 0, 0);
             picBoxBayes.BackColor = System.Drawing.Color.Transparent;
+            picBoxPath.BackColor = System.Drawing.Color.Transparent;
             SetPictureBox(c, ref picBoxMap, ref bMap, 260, 300, x, y);
             picBoxMap.BackColor = System.Drawing.Color.Transparent;
             picBoxBayes.Location = new System.Drawing.Point(0, 0);
@@ -85,6 +102,10 @@ namespace PredatorPreyAssignment
             picBoxObstacle.Parent = picBoxBayes;
             picBoxPrey.Parent = picBoxBayes;
             picBoxBayes.Parent = picBoxMap;
+            picBoxPath.Parent = picBoxBayes;
+
+
+            
         }
 
         // Adds new picture box to scene and sends bitmap + dimensions.
@@ -168,6 +189,9 @@ namespace PredatorPreyAssignment
             UpdatePicBox(picBoxRovio, new System.Drawing.Point((int)(x * 100), (int)(y * 100)));
             //UpdatePicBox(picBoxCone, new Point(picBoxRovio.Location.X-(picBoxCone.Size.Width/2)+(picBoxRovio.Width/2), picBoxRovio.Location.Y-picBoxCone.Size.Width));
             testBool = true;
+
+            
+            
         }
 
 
@@ -179,17 +203,17 @@ namespace PredatorPreyAssignment
         private double GetProbability(bool map, bool input)
         {
             if (map && input)
-                return 0.95;
+                return 0.6;
             else if (map && !input)
-                return 0.49999;
+                return 0.4;
             else if (!map && input)
-                return 0.35;
+                return 0.15;
             else //if (!map && !input)
-                return 0.55;
+                return 0.85;
         }
 
         // Calculates new map for whichever input has been given
-        private void Bayes(bool[,] inputSensor, ref double[,]probability)
+        private void Bayes(bool lookingForPrey, bool[,] inputSensor, ref double[,]probability)
         {
             double threshold = 0.95;
 
@@ -197,7 +221,7 @@ namespace PredatorPreyAssignment
             bool input;
             double mapProb = 0;
             double newProb = 0;
-
+            bool destFound = false;
             for (int i = 0; i < maxX; i++)
             {
                 for (int j = 0; j < maxY; j++)
@@ -212,11 +236,30 @@ namespace PredatorPreyAssignment
 
                     if (newProb < 0.95 && newProb > 0.05)
                         probability[i, j] = newProb;
+                    else if (newProb > 0.75)
+                    {
+                        if (lookingForPrey)
+                        {
+                            destination = new DPoint(i, j);
+                            destFound = true;
+                        }
+                        else
+                            finalMap[i, j] = true;
+                    }
+                    else if (newProb > 0.5 && !lookingForPrey)
+                        finalMap[i, j] = true;
+                    else
+                        finalMap[i, j] = false;
                 }
             }
+
+           // if (lookingForPrey && !destFound)
+                //destination = new DPoint(-1, -1);
         }
 
         bool testBool = false;
+
+        private DPoint destination = new DPoint(-1, -1);
         public void SetUpdate(Rovio.BaseRobot r)
         {
             robot = r;
@@ -231,32 +274,51 @@ namespace PredatorPreyAssignment
         {
             //picBoxCone.Location = new Point(picBoxRovio.Location.X - (picBoxCone.Width / 2) + (picBoxRovio.Width/2),  (picBoxCone.Height/2) + (picBoxRovio.Height));
             //picBoxCone.Location = new Point(0,0);
+
+            
+
+
+
+            
             if (testBool)
             {
                 Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
                 Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.Predator).wallDist * 100));
 
                 Vector2 brandNew = Vector2.Lerp(oldP, newP, 0.1f);
-                picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);
+                //picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);
                 
             
             
             }
             lock (robot.mapLock)
             {
-                Bayes(preySensor, ref preyProbability);
-                Bayes(obstacleSensor, ref obstacleProbability);
+                Bayes(true, preySensor, ref preyProbability);
+                Bayes(false, obstacleSensor, ref obstacleProbability);
                 bBayes = new Bitmap(bMap.Size.Width, bMap.Size.Height);
                 Graphics g = Graphics.FromImage(bBayes);
-                for (int i = 0; i < maxX; i++)
-                {
-                    for (int j = 0; j < maxY; j++)
+
+
+                
+                AStar aa = new AStar(finalMap.GetLength(0), finalMap.GetLength(1));
+                aa.Build(finalMap, new DPoint(destination.X, destination.Y), 
+                    new DPoint((picBoxRovio.Location.X / 10) + (picBoxRovio.Width/10/2), picBoxRovio.Location.Y / 10));
+                
+                    for (int i = 0; i < maxX; i++)
                     {
-                        g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
-                        g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
-                        
+                        for (int j = 0; j < maxY; j++)
+                        {
+                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
+                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
+                            if (aa.inPath[i, j])
+                                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
+                        }
                     }
-                }
+                
+
+                
+
+                //bBayes = new Bitmap(260, 300);
                 picBoxBayes.Image = bBayes;
 
 
@@ -351,7 +413,7 @@ namespace PredatorPreyAssignment
                         catch { }*/
 
 
-                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y - (int)((robot as Rovio.Predator).GetObstacleDistance() * 30 * 3));
+                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.Predator).obstacleRectangle.X + (robot as Rovio.Predator).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.Predator).GetObstacleDistance() * 40 * 3));
 
 
                         double totalFOV = (robot as Rovio.Predator).GetObstacleDistance() * 100 * 0.93;
@@ -364,7 +426,7 @@ namespace PredatorPreyAssignment
                         try
                         {
                             //picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV/2) + (int)newX, picBoxPrey.Location.Y);
-                            DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX, picBoxObstacle.Location.Y);
+                            DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX*2, picBoxObstacle.Location.Y);
                             System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
 
                             m.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
@@ -382,10 +444,16 @@ namespace PredatorPreyAssignment
                         {
                             int p = (int)((picBoxObstacle.Location.X / 10) + 0.5);
                             int q = (int)((picBoxObstacle.Location.Y / 10) + 0.5);
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 1.5), (int)((picBoxObstacle.Location.Y / 10) + 1.5)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 1.5), (int)((picBoxObstacle.Location.Y / 10) + 2.5)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 2.5), (int)((picBoxObstacle.Location.Y / 10) + 1.5)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 2.5), (int)((picBoxObstacle.Location.Y / 10) + 2.5)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)- 1), (int)((picBoxObstacle.Location.Y / 10) - 1)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) - 1), (int)((picBoxObstacle.Location.Y / 10))] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) - 1), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10) -1)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10))] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)+1), (int)((picBoxObstacle.Location.Y / 10) - 1)] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)+1), (int)((picBoxObstacle.Location.Y / 10))] = true;
+                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 1), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
+                            
                         }
                         catch { }
 
@@ -416,6 +484,11 @@ namespace PredatorPreyAssignment
                     DPoint[] aPoints = {new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height/2)), 
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) - 69, picBoxRovio.Location.Y-150),
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) + 69, picBoxRovio.Location.Y-150)};
+
+                    if ((robot as Rovio.Predator).IsObstacleSeen())
+                    {
+                        aPoints = new DPoint[] { aPoints[0], aPoints[1], new DPoint(picBoxObstacle.Location.X, picBoxObstacle.Location.Y + picBoxObstacle.Height), new DPoint(picBoxObstacle.Location.X+picBoxObstacle.Width, picBoxObstacle.Location.Y + picBoxObstacle.Height) };
+                    }
                     m.TransformPoints(aPoints);
                     viewConePoints = aPoints;
                     Bitmap rotated = new Bitmap(bRovio.Width + 70, bRovio.Height + 70);

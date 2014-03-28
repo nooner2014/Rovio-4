@@ -90,22 +90,28 @@ namespace Rovio
 
         public double wallDist = double.PositiveInfinity;
 
-        public delegate void ImageReady(Image image);
-        public event ImageReady SourceImage;
 
+        public event ImageReady SourceImage;
         ////////////////////////////////////////////////////
         //////////////////Initialisation////////////////////
         ////////////////////////////////////////////////////
         
 
-        public Predator(string address, string user, string password, Map m)
-            : base(address, user, password, m)
+        public Predator(string address, string user, string password, Map m, Object k)
+            : base(address, user, password, m, k)
         {
-            map = m;
+           // map = m;
             
         }
 
-        public void PredatorBegin()
+        public override void KeyboardInput()
+        {
+            
+        }
+
+        
+
+        public override void Start()
         {
             //System.Threading.Thread getImage = new System.Threading.Thread(GetImage);
             //getImage.Start();
@@ -450,12 +456,13 @@ namespace Rovio
         ////////////////////////////////////////////////////
         ////////Image processing and output to screen///////
         ////////////////////////////////////////////////////
-
+        
         private void SearchImage()
         {
             while (running)
             {
-                outputImage = cameraImage;
+                
+                    outputImage = cameraImage;
 
                 // Only processes if the image is new.
                 if (outputImage != lastProcessedImage)
@@ -559,7 +566,6 @@ namespace Rovio
 
                         if (!secondFound)
                             secondBlueLineRectangle = new System.Drawing.Rectangle(0, 0, 0, 0);
-                        
                     }
                 }
             }
@@ -703,8 +709,6 @@ namespace Rovio
             mFilter = new AForge.Imaging.Filters.Merge(mergedColourImages);
             mergedColourImages = mFilter.Apply(redColourBitmap);
 
-
-
             mFilter = new AForge.Imaging.Filters.Merge(mergedColourImages);
             mergedColourImages = mFilter.Apply(yellowColourBitmap);
 
@@ -846,9 +850,7 @@ namespace Rovio
                                 lowestPoint = i;
                             highestPoint = i;
                         }
-
                     }
-
                 }
 
                 if (j == 0)

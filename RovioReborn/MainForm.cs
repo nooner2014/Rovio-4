@@ -88,6 +88,8 @@ namespace PredatorPreyAssignment
             labelHue.Hide();
             labelSat.Hide();
             labelLum.Hide();
+            labelBattery.Hide();
+            label7.Hide();
             for (int i = list.Count; i < limit+6; i++)
             {
                 list.Add(new NumericUpDown());
@@ -175,6 +177,8 @@ namespace PredatorPreyAssignment
         // "User" "Predator" "FSM"
         private void InitialiseRobot(string type)
         {
+
+            System.Threading.Thread.Sleep(500);
             buttonPredator.Enabled = true;
             buttonUser.Enabled = true;
             for (int i = 0; i < filterUpDowns.Count; i++)
@@ -192,7 +196,7 @@ namespace PredatorPreyAssignment
                 buttonPredator.Enabled = false;
                 map = new Map(robot, Controls, 387, 18);
                 map.UpdatePicBox += UpdatePictureBox;
-                robot = new Rovio.Predator(robotURL, "user", "password", map);
+                robot = new Rovio.Predator(robotURL, "user", "password", map, currentKeys);
                 (robot as Rovio.Predator).SourceImage += UpdateImage;
 
 
@@ -209,19 +213,19 @@ namespace PredatorPreyAssignment
                     filterUpDowns[i].Enabled = true;
                 }
 
-                robot_thread = new System.Threading.Thread(new System.Threading.ThreadStart((robot as Rovio.Predator).PredatorBegin));
+                robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
             }
             else if (type == "User")
             {
                 if (map != null)
                     map.Hide();
-                robot = new Rovio.UserRobot(robotURL, "user", "password", map);
+                robot = new Rovio.UserRobot(robotURL, "user", "password", map, currentKeys);
                 (robot as Rovio.UserRobot).SourceImage += UpdateImage;
-                robot_thread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((robot as Rovio.UserRobot).User));
-                robot_thread.Start(currentKeys);
+                robot_thread = new System.Threading.Thread(robot.Start);
+                robot_thread.Start();
                 buttonUser.Enabled = false;
-                buttonPredator.Enabled = false;
+                
                 buttonPredator.Enabled = true;
 
             }
@@ -230,6 +234,18 @@ namespace PredatorPreyAssignment
             {
                 picboxCameraImage.Location = new Point(20, 22);
                 picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
+                textBoxIP.Enabled = false;
+                
+                buttonPredator.Enabled = false;
+                buttonUser.Enabled = false;
+                buttonStop.Enabled = false;
+                buttonStop.Enabled = true;
+            }
+            else
+            {
+                textBoxIP.Enabled = true;
+                buttonStop.Enabled = false;
+                robot.KillThreads();
             }
         }
 
@@ -251,7 +267,8 @@ namespace PredatorPreyAssignment
         // Update form picture box
         public void UpdateImage(Image image)
         {
-            picboxCameraImage.Image = image;
+                picboxCameraImage.Image = image;
+
             if (this.InvokeRequired)
             {
                 try
@@ -346,6 +363,16 @@ namespace PredatorPreyAssignment
                 labelBattery.Text = robot.batteryStatus.ToString();
             }
             catch { }
+        }
+
+        private void textBoxIP_TextChanged(object sender, EventArgs e)
+        {
+            robotURL = textBoxIP.Text;
+        }
+
+        private void buttonStop_Click(object sender, EventArgs e)
+        {
+            InitialiseRobot("");
         }
     }
 }

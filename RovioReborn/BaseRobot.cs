@@ -11,7 +11,6 @@ namespace Rovio
 {
     abstract class BaseRobot : Robot
     {
-        protected List<Action> commandList;
         public Bitmap lastProcessedImage;
         public Bitmap cameraImage;
         public System.Drawing.Point cameraDimensions;
@@ -27,17 +26,24 @@ namespace Rovio
         public string direction = "Unknown";
         protected Map map;
         public double cumulativeAngle = 0;
-
+        protected List<int> keys = new List<int>();
         public Object mapLock = new Object();
+
+        public delegate void ImageReady(Image image);
+        
 
 
         protected bool connected = true;
-        public BaseRobot(string address, string user, string password, Map m)
+        public BaseRobot(string address, string user, string password, Map m, Object k)
             : base(address, user, password)
         {
             map = m;
+            keys = (List<int>)k;
             Init();
         }
+
+        public abstract void Start();
+
 
         protected void ImageGet()
         {
@@ -51,6 +57,17 @@ namespace Rovio
             }
         }
 
+        public abstract void KeyboardInput();
+
+        public void KeyboardStart()
+        {
+            while (running)
+            {
+                lock (commandLock)
+                    KeyboardInput();
+            }
+        }
+
         public void Init()
         {
             try { API.Movement.GetLibNSVersion(); } // a dummy request
@@ -60,11 +77,11 @@ namespace Rovio
                 System.Windows.Forms.MessageBox.Show("Could not connect to the robot");
                 cameraDimensions = new System.Drawing.Point(352, 288);
                 connected = false;
-                cameraImage = new Bitmap("example.jpg");
-                return;
-               // Environment.Exit(0);
+                //cameraImage = new Bitmap("example.jpg");
+                Environment.Exit(0);
             }
 
+            
             cameraDimensions = System.Drawing.Point.Empty;
 
             lock (commandLock)
@@ -80,6 +97,9 @@ namespace Rovio
                 else
                     cameraDimensions = new System.Drawing.Point(640, 480);
             }
+            
+            System.Threading.Thread keyboard = new System.Threading.Thread(KeyboardStart);
+            keyboard.Start();
             cameraImageThread = new System.Threading.Thread(ImageGet);
             cameraImageThread.Start();
         }

@@ -9,43 +9,38 @@ namespace Rovio
 {
     class UserRobot : BaseRobot
     {
-
-        public delegate void ImageReady(Image image);
         public event ImageReady SourceImage;
         bool moving;
 
-        public UserRobot(string address, string user, string password, Map m)
-            : base(address, user, password, m)
+        public UserRobot(string address, string user, string password, Map m, Object k)
+            : base(address, user, password, m, k)
         {
 
         }
 
-        // Call this at thread start, passing pointer to list of pressed keys
-        public void User(object keys)
+
+        public override void Start()
         {
+            Bitmap outputImage = new Bitmap(cameraDimensions.X, cameraDimensions.Y);
             while (running)
             {
-                lock (commandLock)
-                {
-                    try
-                    {
-                        SourceImage(cameraImage);
-                    }
-                    catch { }
-                    Input((List<int>)keys);
-                }
+                //lock (commandLock)
+                //{
+                    outputImage = cameraImage;
+                lock(commandLock)
+                    SourceImage(outputImage);
+                //}
             }
-
         }
+
 
         // = Convert.ToInt32(a);
 
         // Take pressed keys for user movement. 
-        public void Input(List<int> keys)
+        public override void KeyboardInput()
         {
             // while (true)
             //{
-
                 if (keys.Count > 0)
                     moving = true;
                 if (keys.Contains(87))

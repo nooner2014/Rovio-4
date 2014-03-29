@@ -277,7 +277,7 @@ namespace PredatorPreyAssignment
 
             
 
-
+            picBoxRovio.Location = new DPoint(100, 100);//(int)(robot.wallDist*100));
 
             
             if (testBool)

@@ -69,14 +69,14 @@ namespace Rovio
                    trackingState = Tracking.Searching;
 
                // If prey has been out of view and hasn't been found with rotation, start roaming.
-               else if (searchingRotationCount >= 8 && trackingState != Tracking.OnScreen)
+               else if (searchingRotationCount >= 8 && trackingState != Tracking.OnScreen && trackingState != Tracking.GoingAroundBlock)
                {
                    
                    trackingState = Tracking.BigSpin;
 
                }
 
-               else
+               else if (trackingState != Tracking.GoingAroundBlock)
                    trackingState = Tracking.OnScreen;
 
 
@@ -175,6 +175,7 @@ namespace Rovio
         { 
             InitialAproach,
             StrafeAround,
+            MoveForwardSome,
             Rotate,
         }
 
@@ -187,6 +188,27 @@ namespace Rovio
                     MoveForward(1, 1);
                 else if (IsObstacleSeen())
                     greenBlockState = GreenBlockState.StrafeAround;
+                else
+                    trackingState = Tracking.Searching;
+            }
+            else if (greenBlockState == GreenBlockState.StrafeAround)
+            {
+                if ((IsObstacleSeen() && obstacleRectangle.Width > 15))//|| !(obstacleRectangle == System.Drawing.Rectangle.Empty))//obstacleRectangle.X < cameraDimensions.Y - (cameraDimensions.Y / 5))
+                    Strafe(4, -1);
+                else
+                greenBlockState = GreenBlockState.MoveForwardSome;
+            }
+            else if (greenBlockState == GreenBlockState.MoveForwardSome)
+            {
+                MoveForward(28, 1);
+                greenBlockState = GreenBlockState.Rotate;
+            }
+            else if (greenBlockState == GreenBlockState.Rotate)
+            { 
+                Rotate90(2, 2);
+                greenBlockState = GreenBlockState.InitialAproach;
+                trackingState = Tracking.Searching;
+
             }
         }
 
@@ -197,6 +219,8 @@ namespace Rovio
                 RotateDirection(2, -3);
             else
                 RotateDirection(2, 3);
+            lock (commandLock)
+                Drive.Stop();
             // Keep track of how long we have been searching. If we've been looking for a while, resume roaming.
             searchingRotationCount++;
             //if (searchingRotationCount > 8)
@@ -208,6 +232,8 @@ namespace Rovio
         {
 
             // If prey is not centred, rotate to it. Otherwise move forward until it's within a certain distance.
+
+            searchingRotationCount = 0;
             if (preyScreenPosition.X < 0 + cameraDimensions.X / 5)
                 RotateDirection(2, -4);
             else if (preyScreenPosition.X > cameraDimensions.X - cameraDimensions.X / 5)

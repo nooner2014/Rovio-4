@@ -45,6 +45,15 @@ namespace Rovio
         public abstract void Start();
 
 
+        protected Point Lerp(Point oldPos, Point newPos, float multiplier)
+        {
+            Microsoft.Xna.Framework.Vector2 oldP = new Microsoft.Xna.Framework.Vector2(oldPos.X, oldPos.Y);
+            Microsoft.Xna.Framework.Vector2 newP = new Microsoft.Xna.Framework.Vector2(newPos.X, newPos.Y);
+
+            Microsoft.Xna.Framework.Vector2 brandNew = Microsoft.Xna.Framework.Vector2.Lerp(oldP, newP, multiplier);
+            return new Point((int)brandNew.X, (int)brandNew.Y);
+        }
+
         protected void ImageGet()
         {
             while (running)
@@ -157,7 +166,7 @@ namespace Rovio
 
                     //cameraImage = Camera.Image;
                 }
-                Drive.Stop();
+                //Drive.Stop();
             }
         }
 

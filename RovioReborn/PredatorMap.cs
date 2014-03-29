@@ -28,11 +28,11 @@ namespace Rovio
 
             //System.Threading.Thread move = new System.Threading.Thread(SetFSMAction);
             System.Threading.Thread move = new System.Threading.Thread(InitialMovements);
-            move.Start();
+            //move.Start();
 
 
 
-            System.Threading.Thread myT = new System.Threading.Thread(MyNewTest);
+            System.Threading.Thread myT = new System.Threading.Thread(GetNewCorrectDirection);
             myT.Start();
 
             System.Threading.Thread distance = new System.Threading.Thread(() => FindALLDISTANCE(ref wallDist));
@@ -52,7 +52,8 @@ namespace Rovio
                 //if (!(trackingState == Tracking.Initial))
                 //Rotate90(1, 6);
 
-                FindDirection();
+                
+                //FindDirection();
 
             }
         }

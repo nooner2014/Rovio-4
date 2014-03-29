@@ -178,7 +178,7 @@ namespace PredatorPreyAssignment
         private void InitialiseRobot(string type)
         {
 
-            System.Threading.Thread.Sleep(500);
+            System.Threading.Thread.Sleep(2000);
             buttonPredator.Enabled = true;
             buttonUser.Enabled = true;
             for (int i = 0; i < filterUpDowns.Count; i++)

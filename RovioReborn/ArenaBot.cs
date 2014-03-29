@@ -188,6 +188,136 @@ namespace Rovio
  
         }
 
+        public void GetNewCorrectDirection()
+        {
+            while (running)
+            {
+
+                if (whiteWallRectangleTop == System.Drawing.Rectangle.Empty && whiteWallRectangleBottom == System.Drawing.Rectangle.Empty)
+                {
+                    if (yellowWallRectangleBottom == System.Drawing.Rectangle.Empty)
+                    {
+                        if (yellowWallRectangleTop.X > 10)
+                            direction = "NorthWest";
+                        else
+                            direction = "NorthEast";
+                    }
+                    else
+                    {
+                        if (yellowWallRectangleTop.X > 10)
+                        {
+                            direction = "SouthEast";
+                        }
+                        else
+                            direction = "SouthWest";
+                    }
+                }
+                if (yellowWallRectangleBottom == System.Drawing.Rectangle.Empty && whiteWallRectangleBottom != System.Drawing.Rectangle.Empty)
+                {
+                    if (yellowWallRectangleTop.X < whiteWallRectangleBottom.X)
+                        direction = "NorthEast";
+                    else
+                        direction = "NorthWest";
+                }
+                else if (yellowWallRectangleTop != System.Drawing.Rectangle.Empty && yellowWallRectangleBottom != System.Drawing.Rectangle.Empty)
+                {
+                    if (whiteWallRectangleBottom.X < yellowWallRectangleTop.X)
+                        direction = "SouthEast";
+                    else
+                        direction = "SouthWest";
+                }
+
+                Console.WriteLine(direction);
+
+
+                char[] which = new char[50];
+                Xna.Vector2[] pos = new Vector2[50];
+                for (int i = 0; i < 352 / 7; i++)
+                {
+                    //      N
+                    //      -
+                    //      Y
+                    // W -X + X+ E
+                    //      Y
+                    //      +
+                    //      S
+
+                    if (direction == "NorthEast")
+                    {
+                        if (yellowWallRectangleTop.Right > (i * 7))
+                        {
+                            which[i] = 'N';
+                            pos[i] = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else
+                        {
+                            which[i] = 'E';
+                            pos[i] = Vector2.Transform(new Vector2(-1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+
+                        }
+                    }
+                    else if (direction == "NorthWest")
+                    {
+                        if (yellowWallRectangleTop.X < (i * 7))
+                        {
+                            which[i] = 'N';
+                            pos[i] = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else
+                        {
+                            which[i] = 'W';
+                            pos[i] = Vector2.Transform(new Vector2(1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+
+                        }
+                    }
+                    else if (direction == "SouthEast")
+                    {
+                        if (yellowWallRectangleTop.X < (i * 7))
+                        {
+                            which[i] = 'S';
+                            pos[i] = Vector2.Transform(new Vector2(0, 1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else
+                        {
+                            which[i] = 'E';
+                            pos[i] = Vector2.Transform(new Vector2(-1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+
+                        }
+                    }
+                    else if (direction == "SouthWest")
+                    {
+                        if (yellowWallRectangleTop.Right > (i * 7))
+                        {
+                            which[i] = 'S';
+                            pos[i] = Vector2.Transform(new Vector2(0, 1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else
+                        {
+                            which[i] = 'W';
+                            pos[i] = Vector2.Transform(new Vector2(1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+
+                        }
+                    }
+                }
+
+                Vector2 totalVec = Vector2.Zero;
+                for (int i = 0; i < 50; i++)
+                {
+                    totalVec += pos[i];
+                }
+
+                totalVec.Normalize();
+                //totalVec = new Vector2(0.33f, 0.68f);
+                float radAngle = -(float)Math.Atan2(totalVec.X, -totalVec.Y);
+                float degAngle = MathHelper.ToDegrees(radAngle);
+
+                if (degAngle < 0)
+                    degAngle += 360;
+                Console.WriteLine(degAngle);
+                cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
+            }
+        }
+
         public void MyNewTest()
         {
             while (running)
@@ -214,15 +344,27 @@ namespace Rovio
                     //      +
                     //      S
 
-                    if (yellowWallRectangleTop.Right > (i * 7))
+                    if (direction == "North")
                     {
-                        which[i] = 'N';
-                        pos[i] = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        if (yellowWallRectangleTop.Right > (i * 7))
+                        {
+                            which[i] = 'N';
+                            pos[i] = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else if (whiteWallRectangleTop.X < 8)
+                        {
+                            which[i] = 'E';
+                            pos[i] = Vector2.Transform(new Vector2(-1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
+                        else
+                        {
+                            which[i] = 'W';
+                            pos[i] = Vector2.Transform(new Vector2(1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                        }
                     }
-                    else
-                    {
-                        which[i] = 'E';
-                        pos[i] = Vector2.Transform(new Vector2(-1, 0), Matrix.CreateRotationZ(MathHelper.ToRadians(i - 25)));
+                    else if (direction == "East")
+                    { 
+                        
                     }
                 }
 
@@ -417,6 +559,8 @@ namespace Rovio
 
 
             // Only need the blue line which intersects the centre to find distance.
+
+            int lowestY = 100;
             rectResult = DetectObstacle(blueFilter, wallImage, new System.Drawing.Point(60, 0), ref blueColourBitmap, new System.Drawing.Point(cameraDimensions.X, 50));
             if (rectResult.Length > 0)
             {
@@ -431,12 +575,17 @@ namespace Rovio
                         if (!firstFound)
                         {
                             blueLineRectangle = rectResult[i];
+
                             firstFound = true;
                         }
                         else if (Math.Abs(blueLineRectangle.Right - rectResult[i].Left) < 50 && !secondFound)
                         {
                             secondBlueLineRectangle = rectResult[i];
                             secondFound = true;
+                            if (blueLineRectangle.Y > secondBlueLineRectangle.Y)
+                                lowestY = secondBlueLineRectangle.Y;
+                            else
+                                lowestY = blueLineRectangle.Y;
                         }
 
                         if (!secondFound)
@@ -450,9 +599,12 @@ namespace Rovio
                 secondBlueLineRectangle = new System.Drawing.Rectangle(0, 0, 0, 0);
             }
 
+            g = Graphics.FromImage(wallImage);
+            g.FillRectangle(new SolidBrush(System.Drawing.Color.Black), new System.Drawing.Rectangle(0, 0, 352, lowestY));
+
 
             // North or south wall
-            rectResult = DetectObstacle(yellowFilter, wallImage, new System.Drawing.Point(100, 0), ref yellowColourBitmap);
+            rectResult = DetectObstacle(yellowFilter, wallImage, new System.Drawing.Point(50, 0), ref yellowColourBitmap);
             if (rectResult.Length > 1 && rectResult[1].Y < rectResult[0].Y)
             {
                 System.Drawing.Rectangle temp = rectResult[1];
@@ -469,6 +621,13 @@ namespace Rovio
             else
                 yellowWallRectangleBottom = new System.Drawing.Rectangle(0, 0, 0, 0);
 
+            if (yellowWallRectangleTop != System.Drawing.Rectangle.Empty && 
+                yellowWallRectangleBottom != System.Drawing.Rectangle.Empty &&
+                Math.Abs(yellowWallRectangleTop.X - yellowWallRectangleBottom.X) > 20)
+            {
+                yellowWallRectangleTop = yellowWallRectangleBottom;
+                yellowWallRectangleBottom = System.Drawing.Rectangle.Empty;
+            }
 
             //West or east wall
             rectResult = DetectObstacle(whiteFilter, wallImage, new System.Drawing.Point(80, 0), ref whiteColourBitmap);
@@ -488,7 +647,8 @@ namespace Rovio
             else
                 whiteWallRectangleBottom = new System.Drawing.Rectangle(0, 0, 0, 0);
 
-
+            if (whiteWallRectangleBottom != System.Drawing.Rectangle.Empty && whiteWallRectangleBottom.Height < 15)
+                whiteWallRectangleBottom = System.Drawing.Rectangle.Empty;
             if (yellowWallRectangleTop != System.Drawing.Rectangle.Empty && whiteWallRectangleTop != System.Drawing.Rectangle.Empty)
             {
                // whiteWallRectangleTop = new System.Drawing.Rectangle(yellowWallRectangleTop.X, whiteWallRectangleTop.Y, whiteWallRectangleTop.Width, whiteWallRectangleTop.Height);
@@ -572,9 +732,7 @@ namespace Rovio
             //ConvertImageFormat(yellowColourBitmap);
             // Find the Y position of wall on left and right hand side (to gauge the perspective and find where robot is facing). 
 
-            AForge.Imaging.Filters.Merge mFilter;
-            mFilter = new AForge.Imaging.Filters.Merge(blueColourBitmap);
-            yellowColourBitmap = mFilter.Apply(yellowColourBitmap);
+            
             yellowTopWallPoints = GetWallPoints(yellowColourBitmap, yellowWallRectangleTop, false);
             yellowBottomWallPoints = GetWallPoints(yellowColourBitmap, yellowWallRectangleBottom, false);
 
@@ -603,6 +761,7 @@ namespace Rovio
             // Merge all images of single colour on black background together.
             Bitmap mergedColourImages = new Bitmap(1, 1);
 
+            AForge.Imaging.Filters.Merge mFilter;
 
             mFilter = new AForge.Imaging.Filters.Merge(greenColourBitmap);
             mergedColourImages = mFilter.Apply(blueColourBitmap);
@@ -736,12 +895,13 @@ namespace Rovio
                     x = (int)cameraDimensions.X / 2;
                 else if (j == 2)
                     x = rect.X + rect.Width - 10;
-                if (x > 352)
-                    x = 351;
+                
                 for (int i = rect.Y; i < rect.Y + rect.Height; i++)
                 {
                     //if (x >= rect.Width)
                     //    break;
+                    if (x >= 352)
+                        x = 351;
                     System.Drawing.Color col = bmp.GetPixel(x, i);
                     System.Drawing.Color checkCol = System.Drawing.Color.FromArgb(255, 0, 0, 0);
                     if (bmp.GetPixel(x, i) != checkCol)

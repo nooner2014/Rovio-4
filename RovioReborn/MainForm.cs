@@ -26,7 +26,7 @@ namespace PredatorPreyAssignment
             User,
         }
 
-        String robotURL = "http://10.82.0.33/";
+        String robotURL = "http://10.82.0.41/";
         static Rovio.BaseRobot robot;
         RobotModes robotState = RobotModes.Predator;
 
@@ -194,19 +194,42 @@ namespace PredatorPreyAssignment
             if (type == "Predator")
             {
                 buttonPredator.Enabled = false;
-                map = new Map(robot, Controls, 387, 18);
+                map = new Map((robot as Rovio.BaseArena), Controls, 387, 18);
                 map.UpdatePicBox += UpdatePictureBox;
-                robot = new Rovio.Predator(robotURL, "user", "password", map, currentKeys);
-                (robot as Rovio.Predator).SourceImage += UpdateImage;
+                robot = new Rovio.PredatorMap(robotURL, "user", "password", map, currentKeys);
+                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
 
 
-                map.SetUpdate(robot);
+                map.SetUpdate((robot as Rovio.BaseArena));
                 
                 updateTimer.Start();
 
                 if (valueDict.Count == 0)
                     ReadDictValues();
-                (robot as Rovio.Predator).SetFilters(valueDict);
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
+                for (int i = 0; i < filterUpDowns.Count; i++)
+                {
+                    filterUpDowns[i].Show();
+                    filterUpDowns[i].Enabled = true;
+                }
+
+                robot_thread = new System.Threading.Thread(robot.Start);
+                robot_thread.Start();
+            }
+            else if (type == "PredatorFSM")
+            {
+                buttonPredatorFSM.Enabled = false;
+                //map = new Map(robot, Controls, 387, 18);
+                //map.UpdatePicBox += UpdatePictureBox;
+                robot = new Rovio.PredatorStateMachine(robotURL, "user", "password", map, currentKeys);
+                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
+                //map.SetUpdate(robot);
+
+                updateTimer.Start();
+
+                if (valueDict.Count == 0)
+                    ReadDictValues();
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
                 for (int i = 0; i < filterUpDowns.Count; i++)
                 {
                     filterUpDowns[i].Show();
@@ -224,13 +247,13 @@ namespace PredatorPreyAssignment
                 (robot as Rovio.UserRobot).SourceImage += UpdateImage;
                 robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
-                buttonUser.Enabled = false;
-                
-                buttonPredator.Enabled = true;
+                //buttonUser.Enabled = false;
+
+                //buttonPredator.Enabled = true;
 
             }
 
-            if (type == "Predator" || type == "User")
+            if (type == "Predator" || type == "PredatorFSM" || type == "User")
             {
                 picboxCameraImage.Location = new Point(20, 22);
                 picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
@@ -238,8 +261,10 @@ namespace PredatorPreyAssignment
                 
                 buttonPredator.Enabled = false;
                 buttonUser.Enabled = false;
-                buttonStop.Enabled = false;
                 buttonStop.Enabled = true;
+                buttonPredatorFSM.Enabled = false;
+                buttonStop.Enabled = true;
+                Focus();
             }
             else
             {
@@ -338,7 +363,7 @@ namespace PredatorPreyAssignment
             if (valueDict.ContainsKey((sender as NumericUpDown).Name.ToString()))
             {
                 valueDict[(sender as NumericUpDown).Name.ToString()] = (float)(sender as NumericUpDown).Value;
-                (robot as Rovio.Predator).SetFilters(valueDict);
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
             }
         }
 
@@ -358,7 +383,7 @@ namespace PredatorPreyAssignment
             {
                 //int dockedStatus = robot.API.Movement.Report.Charging;
                 labelDocked.Text = robot.chargingStatus == 80 ? "Docked" : "Not docked";
-                labelDirection.Text = (robot as Rovio.Predator).lastReadDirection.ToString();
+                labelDirection.Text = (robot as Rovio.BaseArena).lastReadDirection.ToString();
                // int batteryCharge = robot.API.Movement.Report.BatteryLevel;
                 labelBattery.Text = robot.batteryStatus.ToString();
             }
@@ -373,6 +398,11 @@ namespace PredatorPreyAssignment
         private void buttonStop_Click(object sender, EventArgs e)
         {
             InitialiseRobot("");
+        }
+
+        private void buttonPredatorFSM_Click(object sender, EventArgs e)
+        {
+            InitialiseRobot("PredatorFSM");
         }
     }
 }

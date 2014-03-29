@@ -44,6 +44,7 @@
             this.labelLum = new System.Windows.Forms.Label();
             this.labelSat = new System.Windows.Forms.Label();
             this.labelHue = new System.Windows.Forms.Label();
+            this.buttonPredatorFSM = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picboxCameraImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -125,7 +126,7 @@
             this.textBoxIP.Location = new System.Drawing.Point(340, 364);
             this.textBoxIP.Name = "textBoxIP";
             this.textBoxIP.Size = new System.Drawing.Size(123, 20);
-            this.textBoxIP.TabIndex = 12;
+            this.textBoxIP.TabIndex = 0;
             this.textBoxIP.Text = "http://10.82.0.41";
             this.textBoxIP.TextChanged += new System.EventHandler(this.textBoxIP_TextChanged);
             // 
@@ -134,7 +135,7 @@
             this.buttonStop.Location = new System.Drawing.Point(197, 361);
             this.buttonStop.Name = "buttonStop";
             this.buttonStop.Size = new System.Drawing.Size(137, 23);
-            this.buttonStop.TabIndex = 13;
+            this.buttonStop.TabIndex = 0;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
             this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
@@ -185,11 +186,23 @@
             this.labelHue.TabIndex = 3;
             this.labelHue.Text = "Hue (r, v)";
             // 
+            // buttonPredatorFSM
+            // 
+            this.buttonPredatorFSM.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonPredatorFSM.Location = new System.Drawing.Point(13, 361);
+            this.buttonPredatorFSM.Name = "buttonPredatorFSM";
+            this.buttonPredatorFSM.Size = new System.Drawing.Size(75, 23);
+            this.buttonPredatorFSM.TabIndex = 0;
+            this.buttonPredatorFSM.Text = "Predator FSM";
+            this.buttonPredatorFSM.UseVisualStyleBackColor = true;
+            this.buttonPredatorFSM.Click += new System.EventHandler(this.buttonPredatorFSM_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(767, 396);
+            this.Controls.Add(this.buttonPredatorFSM);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.textBoxIP);
             this.Controls.Add(this.labelDirectionLabel);
@@ -204,6 +217,7 @@
             this.Controls.Add(this.buttonUser);
             this.Controls.Add(this.buttonPredator);
             this.Controls.Add(this.picboxCameraImage);
+            this.KeyPreview = true;
             this.Name = "MainForm";
             this.Text = "ImageViewer";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImageViewer_FormClosed);
@@ -234,5 +248,6 @@
         private System.Windows.Forms.Label labelLum;
         private System.Windows.Forms.Label labelSat;
         private System.Windows.Forms.Label labelHue;
+        private System.Windows.Forms.Button buttonPredatorFSM;
     }
 }

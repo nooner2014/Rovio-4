@@ -20,7 +20,7 @@ namespace PredatorPreyAssignment
             Obstacle,
             Other,
         }
-        Rovio.BaseRobot robot;
+        Rovio.BaseArena robot;
 
         // Different picturebox for each image element, with accompanying bitmap.
         private PictureBox picBoxMap;
@@ -58,7 +58,7 @@ namespace PredatorPreyAssignment
         //////////////////Initialisation////////////////////
         ////////////////////////////////////////////////////
 
-        public Map(Rovio.BaseRobot r, Control.ControlCollection c, int x, int y)
+        public Map(Rovio.BaseArena r, Control.ControlCollection c, int x, int y)
         {
             robot = r;
             maxY = 300 / 10;
@@ -166,19 +166,19 @@ namespace PredatorPreyAssignment
             double x = 0;
             double y = 0;
 
-            if ((robot as Rovio.Predator).northDist > (robot as Rovio.Predator).southDist)
-                y = 3 - (robot as Rovio.Predator).southDist;
+            if ((robot as Rovio.BaseArena).northDist > (robot as Rovio.BaseArena).southDist)
+                y = 3 - (robot as Rovio.BaseArena).southDist;
             else
-                y = (robot as Rovio.Predator).northDist;
+                y = (robot as Rovio.BaseArena).northDist;
 
-            if ((robot as Rovio.Predator).eastDist > (robot as Rovio.Predator).westDist)
-                x = (robot as Rovio.Predator).westDist;
+            if ((robot as Rovio.BaseArena).eastDist > (robot as Rovio.BaseArena).westDist)
+                x = (robot as Rovio.BaseArena).westDist;
             else
-                x = 2.64 - (robot as Rovio.Predator).eastDist;
+                x = 2.64 - (robot as Rovio.BaseArena).eastDist;
 
-            if (((robot as Rovio.Predator).northDist > 0.9 && (robot as Rovio.Predator).northDist < 2.3 && (robot as Rovio.Predator).southDist < 2.3 && (robot as Rovio.Predator).southDist > 0.9)
-                || ((robot as Rovio.Predator).southDist > 0.9 && (robot as Rovio.Predator).southDist < 2.3 && (robot as Rovio.Predator).northDist < 2.3 && (robot as Rovio.Predator).northDist > 0.9)
-                && !double.IsInfinity((robot as Rovio.Predator).northDist) && !double.IsInfinity((robot as Rovio.Predator).southDist))// && x < 1.0)
+            if (((robot as Rovio.BaseArena).northDist > 0.9 && (robot as Rovio.BaseArena).northDist < 2.3 && (robot as Rovio.BaseArena).southDist < 2.3 && (robot as Rovio.BaseArena).southDist > 0.9)
+                || ((robot as Rovio.BaseArena).southDist > 0.9 && (robot as Rovio.BaseArena).southDist < 2.3 && (robot as Rovio.BaseArena).northDist < 2.3 && (robot as Rovio.BaseArena).northDist > 0.9)
+                && !double.IsInfinity((robot as Rovio.BaseArena).northDist) && !double.IsInfinity((robot as Rovio.BaseArena).southDist))// && x < 1.0)
                 x -= 0.32;
             else if (x > 2)//if ((robot as Rovio.Predator).eastDist > (robot as Rovio.Predator).westDist)
                 x -= 0.32;
@@ -260,7 +260,7 @@ namespace PredatorPreyAssignment
         bool testBool = false;
 
         private DPoint destination = new DPoint(-1, -1);
-        public void SetUpdate(Rovio.BaseRobot r)
+        public void SetUpdate(Rovio.BaseArena r)
         {
             robot = r;
             timer = new Timer();
@@ -283,7 +283,7 @@ namespace PredatorPreyAssignment
             if (testBool)
             {
                 Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
-                Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.Predator).wallDist * 100));
+                Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDist * 100));
 
                 Vector2 brandNew = Vector2.Lerp(oldP, newP, 0.1f);
                 //picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);
@@ -347,15 +347,15 @@ namespace PredatorPreyAssignment
                 }
 
                 //int away = (robot as Rovio.Predator).preyDistance * 
-                if (robot.GetType() == typeof(Rovio.Predator))
+                if (robot.GetType() == typeof(Rovio.PredatorMap))
                 {
-                    if ((robot as Rovio.Predator).IsPreySeen())
+                    if ((robot as Rovio.BaseArena).IsPreySeen())
                     {
                         //picBoxPrey.Show();
-                        picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y - (int)((robot as Rovio.Predator).GetPreyDistance() * 26 * 3));
+                        picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y - (int)((robot as Rovio.PredatorMap).GetPreyDistance() * 26 * 3));
 
-                        double totalFOV = (robot as Rovio.Predator).GetPreyDistance() * 100 * 0.93;
-                        double percentage = (double)(robot as Rovio.Predator).preyRectangle.X / (double)robot.cameraDimensions.X * 100;
+                        double totalFOV = (robot as Rovio.PredatorMap).GetPreyDistance() * 100 * 0.93;
+                        double percentage = (double)(robot as Rovio.PredatorMap).preyRectangle.X / (double)robot.cameraDimensions.X * 100;
                         double newX = percentage * (totalFOV / 100);
 
                         //int rovLocationX = ((int)totalFOV/2) + (int)newX;
@@ -386,7 +386,7 @@ namespace PredatorPreyAssignment
                     else
                         picBoxPrey.Hide();
 
-                    if ((robot as Rovio.Predator).IsObstacleSeen())
+                    if ((robot as Rovio.BaseArena).IsObstacleSeen())
                     {
 
                         /*
@@ -404,11 +404,11 @@ namespace PredatorPreyAssignment
                         catch { }*/
 
 
-                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.Predator).obstacleRectangle.X + (robot as Rovio.Predator).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.Predator).GetObstacleDistance() * 40 * 3));
+                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.BaseArena).obstacleRectangle.X + (robot as Rovio.BaseArena).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.BaseArena).GetObstacleDistance() * 40 * 3));
 
 
-                        double totalFOV = (robot as Rovio.Predator).GetObstacleDistance() * 100 * 0.93;
-                        double percentage = (double)(robot as Rovio.Predator).obstacleRectangle.X / (double)robot.cameraDimensions.X * 100;
+                        double totalFOV = (robot as Rovio.BaseArena).GetObstacleDistance() * 100 * 0.93;
+                        double percentage = (double)(robot as Rovio.BaseArena).obstacleRectangle.X / (double)robot.cameraDimensions.X * 100;
                         double newX = percentage * (totalFOV / 100);
 
 
@@ -472,7 +472,7 @@ namespace PredatorPreyAssignment
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) - 69, picBoxRovio.Location.Y-150),
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) + 69, picBoxRovio.Location.Y-150)};
 
-                    if ((robot as Rovio.Predator).IsObstacleSeen())
+                    if ((robot as Rovio.BaseArena).IsObstacleSeen())
                     {
                         DPoint leftPoint = new DPoint(picBoxObstacle.Location.X-(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);
                         DPoint rightPoint = new DPoint(picBoxObstacle.Location.X+(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);

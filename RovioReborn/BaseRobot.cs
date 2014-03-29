@@ -180,6 +180,7 @@ namespace Rovio
 
         protected void Rotate90(int iterations=1, int speed=3)
         {
+            
             bool pos = true;
             if (iterations < 0)
                 pos = false;

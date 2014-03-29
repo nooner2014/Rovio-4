@@ -12,17 +12,10 @@ using Xna = Microsoft.Xna.Framework;
 
 namespace Rovio
 {
-    class Predator : BaseRobot
+    abstract class BaseArena : BaseRobot
     {
 
-        enum Tracking
-        {
-            Initial,
-            Searching,
-            OnScreen,
-            Approaching,
-            Roaming,
-        };
+        
 
         // Filters
         AForge.Imaging.Filters.HSLFiltering greenFilter;
@@ -32,7 +25,7 @@ namespace Rovio
         AForge.Imaging.Filters.HSLFiltering whiteFilter;
 
         // Rectangles to draw on screen.
-        System.Drawing.Rectangle preyScreenPosition = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle preyScreenPosition = System.Drawing.Rectangle.Empty;
         public System.Drawing.Rectangle obstacleRectangle = System.Drawing.Rectangle.Empty;
         public System.Drawing.Rectangle preyRectangle = System.Drawing.Rectangle.Empty;
         System.Drawing.Rectangle blueLineRectangle = System.Drawing.Rectangle.Empty;
@@ -53,20 +46,20 @@ namespace Rovio
         
 
         // Line points.
-        System.Drawing.Point wallLeftPoint = System.Drawing.Point.Empty;
-        System.Drawing.Point wallRightPoint = System.Drawing.Point.Empty;
-        System.Drawing.Point[] blueLinePoints = new System.Drawing.Point[4];
-        System.Drawing.Point[] secondBlueLinePoints = new System.Drawing.Point[4];
-        System.Drawing.Point[] yellowTopWallPoints = new System.Drawing.Point[4];
-        System.Drawing.Point[] yellowBottomWallPoints = new System.Drawing.Point[4];
-        System.Drawing.Point[] whiteTopWallPoints = new System.Drawing.Point[4];
-        System.Drawing.Point[] whiteBottomWallPoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point wallLeftPoint = System.Drawing.Point.Empty;
+        protected System.Drawing.Point wallRightPoint = System.Drawing.Point.Empty;
+        protected System.Drawing.Point[] blueLinePoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point[] secondBlueLinePoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point[] yellowTopWallPoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point[] yellowBottomWallPoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point[] whiteTopWallPoints = new System.Drawing.Point[4];
+        protected System.Drawing.Point[] whiteBottomWallPoints = new System.Drawing.Point[4];
 
 
         // Movement affecting variables.
-        Tracking trackingState = Tracking.Initial;
-        int wallLineHeight = 0;
-        int searchingRotationCount = 0;
+       
+        protected int wallLineHeight = 0;
+        protected int searchingRotationCount = 8;
         List<float> wallHeightList = new List<float>();
         List<char> wallDirectionList = new List<char>();
         Bitmap outputImage;
@@ -97,13 +90,15 @@ namespace Rovio
         ////////////////////////////////////////////////////
         
 
-        public Predator(string address, string user, string password, Map m, Object k)
+        public BaseArena(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
         {
            // map = m;
             
         }
         public int output = 0;
+
+
         public override void KeyboardInput()
         {
             try
@@ -115,49 +110,7 @@ namespace Rovio
 
         
 
-        public override void Start()
-        {
-            //System.Threading.Thread getImage = new System.Threading.Thread(GetImage);
-            //getImage.Start();
-
-            System.Threading.Thread search = new System.Threading.Thread(SearchImage);
-            search.Start();
-
-            // System.Threading.Thread source = new System.Threading.Thread(ImageGet);
-            //source.Start();
-
-            //System.Threading.Thread move = new System.Threading.Thread(SetFSMAction);
-            System.Threading.Thread move = new System.Threading.Thread(InitialMovements);
-            move.Start();
-
-
-
-            System.Threading.Thread myT = new System.Threading.Thread(MyNewTest);
-            myT.Start();
-
-            System.Threading.Thread distance = new System.Threading.Thread(() => FindALLDISTANCE(ref wallDist));
-            distance.Start();
-
-            while (running && connected)
-            {
-                //wallLineHeight = 0;
-                //if (preyRectangle.Height != 0)
-                //Console.WriteLine((float)25/preyRectangle.Height);
-
-                //wallLineHeight -= 0.2f;
-
-                System.Threading.Thread.Sleep(1000);
-                //lock (commandLock)
-                    //lock (mapLock)
-                        //if (!(trackingState == Tracking.Initial))
-                            //Rotate90(1, 6);
-
-                FindDirection();
-
-
-
-            }
-        }
+        
 
         public void SetFilters(object values)
         {
@@ -171,7 +124,7 @@ namespace Rovio
         }
 
         // Takes multiple readings of the distance and averages it to eliminate error.
-        private void FindInitialDistance(ref double final, bool moveAfter)
+        protected void FindInitialDistance(ref double final, bool moveAfter)
         {
 
             List<double> arr = new List<double>();
@@ -203,7 +156,7 @@ namespace Rovio
                 Rotate90(3, 3);
         }
 
-        private void FindALLDISTANCE(ref double final)
+        protected void FindALLDISTANCE(ref double final)
         {
             while (running)
             {
@@ -336,47 +289,10 @@ namespace Rovio
         ////////////////////////////////////////////////////
 
         // All movement commands are made via this function (comment out in the main Predator function to stop Rovio moving).
-        private void SetFSMAction()
-        {
-            while (running)
-            {
-                //commandList = new List<Action>();
-                // if (commandList.Count == 0)
-                // {
-
-                // Update state machine action based on latest readings.
-                if (trackingState != Tracking.Initial)
-                {
-                    if (preyRectangle != new System.Drawing.Rectangle(0, 0, 0, 0))
-                        preyScreenPosition = preyRectangle;
-
-                    // If prey is out of view but has been recently seen, search with rotation.
-                    if (preyRectangle == new System.Drawing.Rectangle(0, 0, 0, 0) && searchingRotationCount < 8)
-                        trackingState = Tracking.Searching;
-                    // If prey has been out of view and hasn't been found with rotation, start roaming.
-                    else if (searchingRotationCount >= 8 && trackingState != Tracking.OnScreen)
-                        trackingState = Tracking.Roaming;
-                    // If it's not out of view, it must be on screen.
-                    else
-                        trackingState = Tracking.OnScreen;
-                }
-
-                // Perform the relevant state machine action.
-                if (trackingState == Tracking.Initial)
-                    InitialMovements();
-                else if (trackingState == Tracking.Searching)
-                    Search();
-                else if (trackingState == Tracking.Roaming)
-                    Roam();
-                else
-                    Approach();
-                //}
-                //completed = true;
-            }
-        }
+        
 
         // First movements - rotate 90 degrees four times to localise.
-        private void InitialMovements()
+        protected void InitialMovements()
         {
             FindInitialDistance(ref northDist, true);
             FindInitialDistance(ref eastDist, true);
@@ -384,84 +300,23 @@ namespace Rovio
             FindInitialDistance(ref westDist, true);
 
             map.SetInitialPoint();
-            trackingState = Tracking.Roaming;
         }
 
         // Called when prey has just left the screen.
-        private void Search()
-        {
-            // Rotate to look for prey - direction of rotation depends on which side of the screen prey left from.
-                if (preyScreenPosition.X < cameraDimensions.X / 2)
-                    RotateDirection(2, -3);
-                else
-                    RotateDirection(2, 3);
-            // Keep track of how long we have been searching. If we've been looking for a while, resume roaming.
-            searchingRotationCount++;
-            if (searchingRotationCount > 8)
-                trackingState = Tracking.Roaming;
- 
-        }
+
 
         // Called when prey hasn't been seen for a few seconds.
-        private void Roam()
-        {
-            //if (wallHeight > 20)
-            //{
-
-            // If we are near a wall or obstacle, drive back from it and then rotate in a direction depending on which way we're facing.
-            if (irSensor || wallLineHeight > 15)
-            {
-
-                MoveForward(6, -1);
-                if (wallLeftPoint.Y > wallRightPoint.Y)
-                    RotateDirection(2, 3);
-                else
-                    RotateDirection(2, -3);
-            }
-
-            // If not directly in front of an obstacle, keep moving.
-            else if ((obstacleRectangle.Height < 200 || obstacleRectangle.Width < 100))// && (wallLineRectangle.Height > 25 || wallLineRectangle.Height < 40))
-                    MoveForward(3, 1);
-            // Must be in front of an obstacle, so rotate from it depending on which direction it's at.
-            else
-            {
-                if (obstacleRectangle.X > cameraDimensions.X / 8)
-                    RotateDirection(2, -3);
-                else
-                    RotateDirection(2, 3);
-            }
-            trackingState = Tracking.Roaming;
-        }
+        
 
         // Only called when prey is in view.
-        private void Approach()
-        {
-           
-            // If prey is not centred, rotate to it. Otherwise move forward until it's within a certain distance.
-            if (preyScreenPosition.X < 0 + cameraDimensions.X / 5)
-                RotateDirection(1, -4);
-            else if (preyScreenPosition.X > cameraDimensions.X - cameraDimensions.X / 5)
-                RotateDirection(1, 4);
-            else if (preyRectangle.Width < 80)
-            {
-                trackingState = Tracking.Approaching;
-                if (obstacleRectangle.Height > cameraDimensions.Y - 10 && obstacleRectangle.Width > 180)
-                    Strafe(5, 1);
-                else if (obstacleRectangle.Height > cameraDimensions.Y - 10 && cameraDimensions.X - obstacleRectangle.Width > cameraDimensions.X - 180)
-                    Strafe(5, -1);
-                else
-                    MoveForward(1, 1);
-            }
-            else
-                searchingRotationCount = 0;
-        }
+        
         
 
         ////////////////////////////////////////////////////
         ////////Image processing and output to screen///////
         ////////////////////////////////////////////////////
-        
-        private void SearchImage()
+
+        protected void SearchImage()
         {
             while (running)
             {
@@ -520,7 +375,7 @@ namespace Rovio
             }
         }
 
-        private void FindRectangles()
+        protected void FindRectangles()
         {
 
             System.Drawing.Rectangle[] rectResult;
@@ -697,7 +552,7 @@ namespace Rovio
              */
         }
 
-        private void MergeImages()
+        protected void MergeImages()
         {
             redColourBitmap = ConvertImageFormat(redColourBitmap);
             redColourBitmap = ApplyColour(redColourBitmap, outputImage, System.Drawing.Color.Red);
@@ -766,7 +621,7 @@ namespace Rovio
             outputImage = mFilter.Apply(outputImage);
         }
 
-        private void DrawRectanlges()
+        protected void DrawRectanlges()
         {
             if (obstacleRectangle != new System.Drawing.Rectangle(0, 0, 0, 0))
                 outputImage = DrawRect(outputImage, obstacleRectangle, System.Drawing.Color.DarkGreen, 3f);
@@ -809,7 +664,7 @@ namespace Rovio
 
         }
 
-        private void FindDirection()
+        protected void FindDirection()
         {
             if (wallLineHeight != 0)
             {
@@ -863,7 +718,7 @@ namespace Rovio
         }
 
         // Searches down from X position of rectangle to find actual height of segmented object in rectangle.
-        private System.Drawing.Point[] GetWallPoints(Bitmap bmp, System.Drawing.Rectangle rect, bool minimumLimit)
+        protected System.Drawing.Point[] GetWallPoints(Bitmap bmp, System.Drawing.Rectangle rect, bool minimumLimit)
         {
             System.Drawing.Point topRight = new System.Drawing.Point(0, 0);
             System.Drawing.Point topLeft = new System.Drawing.Point(0, 0);
@@ -922,7 +777,7 @@ namespace Rovio
             return new System.Drawing.Point[] { emptyPoint, emptyPoint, emptyPoint, emptyPoint };
         }
 
-        private void FindBlueLineHeight()
+        protected void FindBlueLineHeight()
         {
             float topPoint = 0;
             float bottomPoint = 0;

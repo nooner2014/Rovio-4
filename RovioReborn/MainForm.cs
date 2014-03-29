@@ -26,7 +26,7 @@ namespace PredatorPreyAssignment
             User,
         }
 
-        String robotURL = "http://10.82.0.41/";
+        String robotURL = "http://10.82.0.33/";
         static Rovio.BaseRobot robot;
         RobotModes robotState = RobotModes.Predator;
 

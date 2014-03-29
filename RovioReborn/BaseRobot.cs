@@ -64,7 +64,10 @@ namespace Rovio
             while (running)
             {
                 lock (commandLock)
-                    KeyboardInput();
+                {
+                    if (keys.Count == 1)
+                        KeyboardInput();
+                }
             }
         }
 

@@ -103,10 +103,14 @@ namespace Rovio
            // map = m;
             
         }
-
+        public int output = 0;
         public override void KeyboardInput()
         {
-            
+            try
+            {
+                output = keys[0] - 48;
+            }
+            catch { }
         }
 
         
@@ -241,10 +245,10 @@ namespace Rovio
                 char[] which = new char[50];
                 Xna.Vector2[] pos = new Vector2[50];
 
-                Console.WriteLine("Yellow top: " + yellowWallRectangleTop);
-                Console.WriteLine("Yellow bottom: " + yellowWallRectangleBottom);
-                Console.WriteLine("White top: " + whiteWallRectangleTop);
-                Console.WriteLine("Yellow top: " + whiteWallRectangleBottom);
+                //Console.WriteLine("Yellow top: " + yellowWallRectangleTop);
+                //Console.WriteLine("Yellow bottom: " + yellowWallRectangleBottom);
+                //Console.WriteLine("White top: " + whiteWallRectangleTop);
+                //Console.WriteLine("Yellow top: " + whiteWallRectangleBottom);
 
 
                 for (int i = 0; i < 352 / 7; i++)
@@ -492,9 +496,25 @@ namespace Rovio
                     preyDistance = (float)25 / (float)preyRectangle.Height;
                     obstacleDistance = (float)130 / (float)obstacleRectangle.Height;
 
-                    
+
 
                     if (outputImage != null)
+                    {
+                        switch (output)
+                        {
+                            case 1: outputImage = redColourBitmap;
+                                break;
+                            case 2: outputImage = greenColourBitmap;
+                                break;
+                            case 3: outputImage = blueColourBitmap;
+                                break;
+                            case 4: outputImage = yellowColourBitmap;
+                                break;
+                            case 5: outputImage = whiteColourBitmap;
+                                break;
+                            
+                        }
+                    }
                         SourceImage(outputImage);
                 }
             }
@@ -596,7 +616,7 @@ namespace Rovio
 
 
             //West or east wall
-            rectResult = DetectObstacle(whiteFilter, wallImage, new System.Drawing.Point(80, 5), ref whiteColourBitmap);
+            rectResult = DetectObstacle(whiteFilter, wallImage, new System.Drawing.Point(80, 0), ref whiteColourBitmap);
             if (rectResult.Length > 1 && rectResult[1].Y < rectResult[0].Y)
             {
                 System.Drawing.Rectangle temp = rectResult[1];
@@ -612,7 +632,24 @@ namespace Rovio
                 whiteWallRectangleBottom = rectResult[1];
             else
                 whiteWallRectangleBottom = new System.Drawing.Rectangle(0, 0, 0, 0);
-            
+
+
+            if (yellowWallRectangleTop != System.Drawing.Rectangle.Empty && whiteWallRectangleTop != System.Drawing.Rectangle.Empty)
+            {
+               // whiteWallRectangleTop = new System.Drawing.Rectangle(yellowWallRectangleTop.X, whiteWallRectangleTop.Y, whiteWallRectangleTop.Width, whiteWallRectangleTop.Height);
+
+                if (yellowWallRectangleTop.X < 10)
+                {
+                    whiteWallRectangleTop.X = yellowWallRectangleTop.Right;
+                }
+                else if (yellowWallRectangleTop.X - whiteWallRectangleTop.X > 0)
+                {
+                    whiteWallRectangleTop.X = 0;
+                    whiteWallRectangleTop.Width = yellowWallRectangleTop.X;
+                }
+                whiteWallRectangleBottom = whiteWallRectangleTop;
+                whiteWallRectangleTop = System.Drawing.Rectangle.Empty;
+            }
             /*
             if (rectResult.Length > 1 && rectResult[1].Y < rectResult[0].Y)
             {
@@ -689,6 +726,15 @@ namespace Rovio
             whiteTopWallPoints = GetWallPoints(whiteColourBitmap, whiteWallRectangleTop, false);
             whiteBottomWallPoints = GetWallPoints(whiteColourBitmap, whiteWallRectangleBottom, false);
 
+           // if (Math.Abs(whiteTopWallPoints[0].Y - whiteTopWallPoints[3].Y) <1)
+            //    whiteWallRectangleTop = System.Drawing.Rectangle.Empty;
+           // if (Math.Abs(whiteTopWallPoints[1].Y - whiteTopWallPoints[2].Y) < 1)
+               // whiteWallRectangleTop = System.Drawing.Rectangle.Empty;
+
+            //if (Math.Abs(whiteBottomWallPoints[0].Y - whiteBottomWallPoints[3].Y) <1 )
+                //whiteWallRectangleBottom = System.Drawing.Rectangle.Empty;
+            //if (Math.Abs(whiteBottomWallPoints[1].Y - whiteBottomWallPoints[2].Y) < 1)
+                //whiteWallRectangleBottom = System.Drawing.Rectangle.Empty;
             blueLinePoints = GetWallPoints(blueColourBitmap, blueLineRectangle, false);
             secondBlueLinePoints = GetWallPoints(blueColourBitmap, secondBlueLineRectangle, false);
             // Call GetPoint again to set line height (so we know how far away we are from the wall).
@@ -747,7 +793,6 @@ namespace Rovio
 
             if (yellowBottomWallPoints != null)
                 outputImage = DrawLineFromPoints(outputImage, yellowBottomWallPoints, System.Drawing.Color.DarkOrange, 3f);
-
             if (yellowWallRectangleTop.Width < 200)
             {
                 if (whiteTopWallPoints != null)
@@ -836,14 +881,16 @@ namespace Rovio
                     x = (int)cameraDimensions.X / 2;
                 else if (j == 2)
                     x = rect.X + rect.Width - 10;
-
+                if (x > 352)
+                    x = 351;
                 for (int i = rect.Y; i < rect.Y + rect.Height; i++)
                 {
+                    //if (x >= rect.Width)
+                    //    break;
                     System.Drawing.Color col = bmp.GetPixel(x, i);
                     System.Drawing.Color checkCol = System.Drawing.Color.FromArgb(255, 0, 0, 0);
                     if (bmp.GetPixel(x, i) != checkCol)
                     {
-
                         if (col != System.Drawing.Color.Cyan)
                         {
                             if (highestPoint == 0)

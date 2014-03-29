@@ -36,6 +36,6 @@ yellowLumMax:0.8
 whiteHueMin:181
 whiteHueMax:180
 whiteSatMin:0.0
-whiteSatMax:0.52
+whiteSatMax:0.7
 whiteLumMin:0.50
-whiteLumMax:0.9
+whiteLumMax:0.8

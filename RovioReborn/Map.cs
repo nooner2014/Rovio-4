@@ -253,8 +253,8 @@ namespace PredatorPreyAssignment
                 }
             }
 
-           // if (lookingForPrey && !destFound)
-                //destination = new DPoint(-1, -1);
+            if (lookingForPrey && !destFound)
+                destination = new DPoint(-1, -1);
         }
 
         bool testBool = false;
@@ -314,13 +314,9 @@ namespace PredatorPreyAssignment
                                 g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
                         }
                     }
-                
-
-                
 
                 //bBayes = new Bitmap(260, 300);
                 picBoxBayes.Image = bBayes;
-
 
                 Graphics myg = Graphics.FromImage(bMap);
                 if (viewConePoints != null)
@@ -362,7 +358,6 @@ namespace PredatorPreyAssignment
                         double percentage = (double)(robot as Rovio.Predator).preyRectangle.X / (double)robot.cameraDimensions.X * 100;
                         double newX = percentage * (totalFOV / 100);
 
-
                         //int rovLocationX = ((int)totalFOV/2) + (int)newX;
                         //int rovLocationY = 
                         try
@@ -384,13 +379,9 @@ namespace PredatorPreyAssignment
 
                         try
                         {
-                            
                             preySensor[(int)((picBoxPrey.Location.X / 10) + 1.5), (int)((picBoxPrey.Location.Y / 10) + 1.5)] = true;
                         }
                         catch { }
-
-
-
                     }
                     else
                         picBoxPrey.Hide();
@@ -433,7 +424,6 @@ namespace PredatorPreyAssignment
                             m.Translate(0f, -0f);
                             System.Drawing.Point[] aPoints = { newPosition };
                             m.TransformPoints(aPoints);
-
                             picBoxObstacle.Location = aPoints[0];
 
                         }
@@ -444,19 +434,16 @@ namespace PredatorPreyAssignment
                         {
                             int p = (int)((picBoxObstacle.Location.X / 10) + 0.5);
                             int q = (int)((picBoxObstacle.Location.Y / 10) + 0.5);
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)- 1), (int)((picBoxObstacle.Location.Y / 10) - 1)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) - 1), (int)((picBoxObstacle.Location.Y / 10))] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) - 1), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10) -1)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10))] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)+1), (int)((picBoxObstacle.Location.Y / 10) - 1)] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10)+1), (int)((picBoxObstacle.Location.Y / 10))] = true;
-                            obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + 1), (int)((picBoxObstacle.Location.Y / 10) + 1)] = true;
-                            
+
+                            for (int i = -1; i <= 1; i++)
+                            {
+                                for (int j = -1; j <= 1; j++)
+                                {
+                                    obstacleSensor[(int)((picBoxObstacle.Location.X / 10) + i), (int)((picBoxObstacle.Location.Y / 10) + j)] = true;
+                                }
+                            }
                         }
                         catch { }
-
                     }
                     else
                     {
@@ -487,7 +474,18 @@ namespace PredatorPreyAssignment
 
                     if ((robot as Rovio.Predator).IsObstacleSeen())
                     {
-                        aPoints = new DPoint[] { aPoints[0], aPoints[1], new DPoint(picBoxObstacle.Location.X, picBoxObstacle.Location.Y + picBoxObstacle.Height), new DPoint(picBoxObstacle.Location.X+picBoxObstacle.Width, picBoxObstacle.Location.Y + picBoxObstacle.Height) };
+                        DPoint leftPoint = new DPoint(picBoxObstacle.Location.X-(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);
+                        DPoint rightPoint = new DPoint(picBoxObstacle.Location.X+(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);
+                        if (PointInPolygon(leftPoint, aPoints) && PointInPolygon(rightPoint, aPoints))
+                        {
+                            aPoints = new DPoint[] { aPoints[0], aPoints[1], leftPoint, rightPoint, aPoints[2] };
+                        }
+                        else
+                        {
+                            leftPoint = new DPoint(picBoxObstacle.Location.X - (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
+                            rightPoint = new DPoint(picBoxObstacle.Location.X + (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
+                            aPoints = new DPoint[] { aPoints[0], aPoints[1], leftPoint, rightPoint, aPoints[2] };
+                        }
                     }
                     m.TransformPoints(aPoints);
                     viewConePoints = aPoints;

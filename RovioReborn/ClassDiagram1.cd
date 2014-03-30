@@ -3,14 +3,14 @@
   <Class Name="Rovio.BaseArena" Collapsed="true">
     <Position X="6.5" Y="10.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>hAgCEIEaNogDAJIASwrYQSFAWpEBJAAAIIgCGAAABDQ=</HashCode>
+      <HashCode>hAgCEIEaNogDAJIASwrYQSFAWpEBJAAAIIgCGBAABDQ=</HashCode>
       <FileName>ArenaBot.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.BaseRobot" Collapsed="true">
-    <Position X="7.75" Y="9" Width="1.5" />
+    <Position X="8.25" Y="9" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>CBBAMABIQiAIIBFAYAAAJAhIQAmAAAAAABAmARAAAAA=</HashCode>
+      <HashCode>CBBAMABIQiAIIBFAYAAAJAhIQAmAAAAAgBAmARAAAAA=</HashCode>
       <FileName>BaseRobot.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -24,12 +24,12 @@
   <Class Name="Rovio.PredatorStateMachine" Collapsed="true">
     <Position X="7.75" Y="12" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAiAAAAAAABAAAAAAAoAAIAAAAAAAAAAgAAA=</HashCode>
+      <HashCode>AAAAAAAAAiAAAAAAABAAAAAAAoAAIAAAAAAAAAAgQAA=</HashCode>
       <FileName>PredatorStateMachine.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.Robot" Collapsed="true">
-    <Position X="7.75" Y="7.75" Width="1.5" />
+    <Position X="8.25" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAAIAAAEAAAAAAAgAAAAwAEAAAQAAAAAAAA=</HashCode>
       <FileName>Rovio.cs</FileName>
@@ -85,40 +85,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.AStar" Collapsed="true">
-    <Position X="5.25" Y="8" Width="1.5" />
+    <Position X="6.5" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAEAAAACABAACgCAAAAAAAAgQAAAIASAAAQAAA=</HashCode>
       <FileName>AStar.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.MainForm" Collapsed="true">
-    <Position X="7.75" Y="6.5" Width="1.5" />
-    <NestedTypes>
-      <Enum Name="PredatorPreyAssignment.MainForm.RobotModes" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>MainForm.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-    </NestedTypes>
+    <Position X="8.25" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAQEMQAADJUSBJAAEC1ABUDAIEQBBQCJhAAAAIAhAA=</HashCode>
+      <HashCode>AAAQEMQAADJUSBJAAEC1BBUDAIEQBBQCJhAAAAIAhAA=</HashCode>
       <FileName>MainForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.Map" Collapsed="true">
-    <Position X="5.25" Y="8.75" Width="1.5" />
-    <NestedTypes>
-      <Enum Name="PredatorPreyAssignment.Map.Type" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Map.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-      <Delegate Name="PredatorPreyAssignment.Map.UpdatePictureBox" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Map.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
-    </NestedTypes>
+    <Position X="6.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQIAAQAgAMAAQCQGAhEAjIgAABBCQAKAKAIBDAAIQA=</HashCode>
       <FileName>Map.cs</FileName>

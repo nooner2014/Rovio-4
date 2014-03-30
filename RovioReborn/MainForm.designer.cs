@@ -45,7 +45,9 @@
             this.labelSat = new System.Windows.Forms.Label();
             this.labelHue = new System.Windows.Forms.Label();
             this.buttonPredatorFSM = new System.Windows.Forms.Button();
+            this.picBoxUserLabels = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.picboxCameraImage)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBoxUserLabels)).BeginInit();
             this.SuspendLayout();
             // 
             // picboxCameraImage
@@ -64,7 +66,6 @@
             this.buttonPredator.TabIndex = 0;
             this.buttonPredator.Text = "Predator";
             this.buttonPredator.UseVisualStyleBackColor = true;
-            this.buttonPredator.Click += new System.EventHandler(this.buttonPredator_Click);
             // 
             // buttonUser
             // 
@@ -74,7 +75,6 @@
             this.buttonUser.TabIndex = 0;
             this.buttonUser.Text = "User";
             this.buttonUser.UseVisualStyleBackColor = true;
-            this.buttonUser.Click += new System.EventHandler(this.buttonUser_Click);
             // 
             // labelDocked
             // 
@@ -84,6 +84,7 @@
             this.labelDocked.Size = new System.Drawing.Size(73, 13);
             this.labelDocked.TabIndex = 6;
             this.labelDocked.Text = "dockedStatus";
+            this.labelDocked.Visible = false;
             // 
             // updateTimer
             // 
@@ -99,6 +100,7 @@
             this.label6.Size = new System.Drawing.Size(47, 13);
             this.label6.TabIndex = 8;
             this.label6.Text = "Status:";
+            this.label6.Visible = false;
             // 
             // labelDirection
             // 
@@ -108,6 +110,7 @@
             this.labelDirection.Size = new System.Drawing.Size(59, 13);
             this.labelDirection.TabIndex = 10;
             this.labelDirection.Text = "<direction>";
+            this.labelDirection.Visible = false;
             // 
             // labelDirectionLabel
             // 
@@ -118,6 +121,7 @@
             this.labelDirectionLabel.Size = new System.Drawing.Size(62, 13);
             this.labelDirectionLabel.TabIndex = 11;
             this.labelDirectionLabel.Text = "Direction:";
+            this.labelDirectionLabel.Visible = false;
             // 
             // textBoxIP
             // 
@@ -132,13 +136,13 @@
             // 
             // buttonStop
             // 
+            this.buttonStop.Enabled = false;
             this.buttonStop.Location = new System.Drawing.Point(197, 361);
             this.buttonStop.Name = "buttonStop";
             this.buttonStop.Size = new System.Drawing.Size(137, 23);
             this.buttonStop.TabIndex = 0;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
-            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
             // label7
             // 
@@ -193,15 +197,23 @@
             this.buttonPredatorFSM.Name = "buttonPredatorFSM";
             this.buttonPredatorFSM.Size = new System.Drawing.Size(75, 23);
             this.buttonPredatorFSM.TabIndex = 0;
-            this.buttonPredatorFSM.Text = "Predator FSM";
+            this.buttonPredatorFSM.Text = "PredatorFSM";
             this.buttonPredatorFSM.UseVisualStyleBackColor = true;
-            this.buttonPredatorFSM.Click += new System.EventHandler(this.buttonPredatorFSM_Click);
+            // 
+            // picBoxUserLabels
+            // 
+            this.picBoxUserLabels.Location = new System.Drawing.Point(387, 33);
+            this.picBoxUserLabels.Name = "picBoxUserLabels";
+            this.picBoxUserLabels.Size = new System.Drawing.Size(253, 217);
+            this.picBoxUserLabels.TabIndex = 12;
+            this.picBoxUserLabels.TabStop = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(767, 396);
+            this.ClientSize = new System.Drawing.Size(751, 397);
+            this.Controls.Add(this.picBoxUserLabels);
             this.Controls.Add(this.buttonPredatorFSM);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.textBoxIP);
@@ -218,6 +230,7 @@
             this.Controls.Add(this.buttonPredator);
             this.Controls.Add(this.picboxCameraImage);
             this.KeyPreview = true;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "ImageViewer";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImageViewer_FormClosed);
@@ -226,6 +239,7 @@
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageViewer_KeyUp);
             this.Resize += new System.EventHandler(this.ImageViewer_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.picboxCameraImage)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBoxUserLabels)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -249,5 +263,6 @@
         private System.Windows.Forms.Label labelSat;
         private System.Windows.Forms.Label labelHue;
         private System.Windows.Forms.Button buttonPredatorFSM;
+        private System.Windows.Forms.PictureBox picBoxUserLabels;
     }
 }

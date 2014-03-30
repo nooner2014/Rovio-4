@@ -314,7 +314,7 @@ namespace Rovio
                 if (degAngle < 0)
                     degAngle += 360;
                 Console.WriteLine(degAngle);
-                cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
+                //cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
             }
         }
 

@@ -203,13 +203,25 @@ namespace PredatorPreyAssignment
         private double GetProbability(bool map, bool input)
         {
             if (map && input)
-                return 0.6;
+                return 0.7;
             else if (map && !input)
-                return 0.4;
+                return 0.48;
             else if (!map && input)
-                return 0.15;
+                return 0.39;
             else //if (!map && !input)
-                return 0.85;
+                return 0.49;
+        }
+
+        private double GetPreyProbability(bool map, bool input)
+        {
+            if (map && input)
+                return 0.9;
+            else if (map && !input)
+                return 0.48;
+            else if (!map && input)
+                return 0.39;
+            else //if (!map && !input)
+                return 0.89;
         }
 
         // Calculates new map for whichever input has been given
@@ -222,6 +234,9 @@ namespace PredatorPreyAssignment
             double mapProb = 0;
             double newProb = 0;
             bool destFound = false;
+
+            double maxProb = -1;
+            DPoint maxIndex = new DPoint(-1, -1);
             for (int i = 0; i < maxX; i++)
             {
                 for (int j = 0; j < maxY; j++)
@@ -232,15 +247,24 @@ namespace PredatorPreyAssignment
                     input = inputSensor[i, j];
                     mapProb = probability[i, j];
                     map = (mapProb < threshold);
-                    newProb = (GetProbability(map, input) * mapProb) / ((GetProbability(map, input) * mapProb + GetProbability(!map, input) * ((1 - mapProb))));
 
+                    if (lookingForPrey)
+                        newProb = (GetPreyProbability(map, input) * mapProb) / ((GetProbability(map, input) * mapProb + GetProbability(!map, input) * ((1 - mapProb))));
+                    else
+                        newProb = (GetProbability(map, input) * mapProb) / ((GetProbability(map, input) * mapProb + GetProbability(!map, input) * ((1 - mapProb))));
+
+                    if (newProb > maxProb)
+                    {
+                        maxIndex = new DPoint(i, j);
+                        maxProb = newProb;
+                    }
                     if (newProb < 0.95 && newProb > 0.05)
                         probability[i, j] = newProb;
                     else if (newProb > 0.75)
                     {
                         if (lookingForPrey)
                         {
-                            destination = new DPoint(i, j);
+                            //destination = new DPoint(i, j);
                             destFound = true;
                         }
                         else
@@ -253,8 +277,18 @@ namespace PredatorPreyAssignment
                 }
             }
 
-            if (lookingForPrey && !destFound)
-                destination = new DPoint(-1, -1);
+            if (lookingForPrey)
+            {
+                if (maxProb < 0.6)
+                    destination = new DPoint(-1, -1);
+                else if (maxProb > 0.9)
+                {
+                    destination = maxIndex;
+                }
+            }
+
+            //if (lookingForPrey && !destFound)
+                //destination = new DPoint(-1, -1);
         }
 
         bool testBool = false;
@@ -275,9 +309,9 @@ namespace PredatorPreyAssignment
             //picBoxCone.Location = new Point(picBoxRovio.Location.X - (picBoxCone.Width / 2) + (picBoxRovio.Width/2),  (picBoxCone.Height/2) + (picBoxRovio.Height));
             //picBoxCone.Location = new Point(0,0);
 
-            
 
-            picBoxRovio.Location = new DPoint(100, 100);//(int)(robot.wallDist*100));
+            robot.cumulativeAngle = 0;
+            picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDist*100));
 
             
             if (testBool)
@@ -404,7 +438,7 @@ namespace PredatorPreyAssignment
                         catch { }*/
 
 
-                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.BaseArena).obstacleRectangle.X + (robot as Rovio.BaseArena).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.BaseArena).GetObstacleDistance() * 40 * 3));
+                        picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.BaseArena).obstacleRectangle.X + (robot as Rovio.BaseArena).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.BaseArena).GetObstacleDistance() * 20 * 3));
 
 
                         double totalFOV = (robot as Rovio.BaseArena).GetObstacleDistance() * 100 * 0.93;
@@ -421,7 +455,7 @@ namespace PredatorPreyAssignment
                             System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
 
                             m.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
-                            m.Translate(0f, -0f);
+                            m.Translate((float)-newX+30f, -(float)(robot.GetObstacleDistance() * 40 * 3));
                             System.Drawing.Point[] aPoints = { newPosition };
                             m.TransformPoints(aPoints);
                             picBoxObstacle.Location = aPoints[0];
@@ -472,22 +506,33 @@ namespace PredatorPreyAssignment
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) - 69, picBoxRovio.Location.Y-150),
                                                      new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) + 69, picBoxRovio.Location.Y-150)};
 
+                    
+                    m.TransformPoints(aPoints);
+
                     if ((robot as Rovio.BaseArena).IsObstacleSeen())
                     {
-                        DPoint leftPoint = new DPoint(picBoxObstacle.Location.X-(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);
-                        DPoint rightPoint = new DPoint(picBoxObstacle.Location.X+(picBoxObstacle.Width/2), picBoxObstacle.Location.Y-15);
+                        DPoint leftPoint = new DPoint(picBoxObstacle.Location.X - (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
+                        DPoint rightPoint = leftPoint;
+
+                        System.Drawing.Drawing2D.Matrix mx = new System.Drawing.Drawing2D.Matrix();
+                        mx.RotateAt((float)robot.cumulativeAngle, leftPoint);
+                        mx.Translate(0, -25);
+                        DPoint[] tempPointArr = {leftPoint};
+                        mx.TransformPoints(tempPointArr);
+                        leftPoint = tempPointArr[0];
+
+
+                        mx = new System.Drawing.Drawing2D.Matrix();
+                        mx.RotateAt((float)robot.cumulativeAngle, leftPoint);
+                        mx.Translate(30, 0);
+                        tempPointArr[0] = leftPoint;
+                        mx.TransformPoints(tempPointArr);
+                        rightPoint = tempPointArr[0];
                         if (PointInPolygon(leftPoint, aPoints) && PointInPolygon(rightPoint, aPoints))
                         {
                             aPoints = new DPoint[] { aPoints[0], aPoints[1], leftPoint, rightPoint, aPoints[2] };
                         }
-                        else
-                        {
-                            leftPoint = new DPoint(picBoxObstacle.Location.X - (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
-                            rightPoint = new DPoint(picBoxObstacle.Location.X + (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
-                            aPoints = new DPoint[] { aPoints[0], aPoints[1], leftPoint, rightPoint, aPoints[2] };
-                        }
                     }
-                    m.TransformPoints(aPoints);
                     viewConePoints = aPoints;
                     Bitmap rotated = new Bitmap(bRovio.Width + 70, bRovio.Height + 70);
                     rotated.SetResolution(bRovio.HorizontalResolution, bRovio.VerticalResolution);

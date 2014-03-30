@@ -63,9 +63,7 @@ namespace PredatorPreyAssignment
                         }
                     }
                 }
-
                 upDownHandler = new EventHandler(UpDownHandler);
-                
             }
             catch
             {
@@ -76,11 +74,11 @@ namespace PredatorPreyAssignment
 
         private void FilterChangersSetup(List<NumericUpDown> list, string col)
         {
-            Point imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 200 + (120 * (list.Count / 12)/3), 85);
+            Point imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 30 + (120 * (list.Count / 12)/3), 85);
             int limit = list.Count;
             try
             {
-                imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 200 + (int)(120 * (list.Count / 6) - (12 % limit) * 30 ), 85 + (int)(12 % (limit) * 8.2f));
+                imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 30 + (int)(120 * (list.Count / 6) - (12 % limit) * 30 ), 85 + (int)(12 % (limit) * 8.2f));
             }
             catch { }
             Size imageSegmentingAdjustingSize = new Size(50, 20);
@@ -93,7 +91,7 @@ namespace PredatorPreyAssignment
             for (int i = list.Count; i < limit+6; i++)
             {
                 list.Add(new NumericUpDown());
-                //Controls.Add(list[i]);
+                Controls.Add(list[i]);
                 list[i].ValueChanged += upDownHandler;
                 if (i == limit+0)
                     list[i].Name = col + "HueMin";
@@ -128,22 +126,30 @@ namespace PredatorPreyAssignment
                 list[i].TabIndex = 0;
                 list[i].Value = 0;
                 list[i].Anchor = AnchorStyles.Top | AnchorStyles.Left;
-
+                list[i].Visible = false;
 
                 filterLabels.Add(new Label());
                 filterLabels[list.Count / 6].Location = new Point(list[limit].Location.X + 32, list[limit].Location.Y - 15);
                 filterLabels[list.Count / 6].Size = new Size(40, 15);
                 filterLabels[list.Count / 6].Text = col[0].ToString().ToUpper() + col.Substring(1);
-                //Controls.Add(filterLabels[list.Count / 6]);
+                Controls.Add(filterLabels[list.Count / 6]);
+
+                
             }
+            for (int i = 0; i < filterLabels.Count; i++)
+                filterLabels[i].Visible = false;
         }
 
         static Map map;
         private void ImageViewer_Load(object sender, EventArgs e)
         {
-
-
-            
+            textBoxIP.Text = robotURL;
+            picboxCameraImage.Size = new Size(352, 288);
+            Bitmap b = new Bitmap(352, 288);
+            Graphics g = Graphics.FromImage(b);
+            g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0, 0, 352, 288));
+            g.DrawString("Not connected", new Font(FontFamily.GenericSansSerif, 12), new SolidBrush(Color.Black), new Point(120, 135));
+            picboxCameraImage.Image = b;
             upDownHandler += new EventHandler(UpDownHandler);
             FilterChangersSetup(filterUpDowns, "green");
             FilterChangersSetup(filterUpDowns, "red");
@@ -151,18 +157,18 @@ namespace PredatorPreyAssignment
             FilterChangersSetup(filterUpDowns, "yellow");
             FilterChangersSetup(filterUpDowns, "white");
 
+
+            SetUserControlLabels();
+
+            robotButtonEventHandler = RobotButtonHandler;
+
+            buttonPredator.Click += robotButtonEventHandler;
+            buttonPredatorFSM.Click += robotButtonEventHandler;
+            buttonUser.Click += robotButtonEventHandler;
+            buttonStop.Click += robotButtonEventHandler;
+
             Show();
-            
-            
-
-
-            
-
-
-            //
-            
             Text = "BLA11210972 Computer Vision & Robotics Predator/Prey";
-
             Label l = new Label();
 
             //Show();
@@ -174,18 +180,65 @@ namespace PredatorPreyAssignment
             
         }
 
+        EventHandler robotButtonEventHandler;// = RobotButtonHandler;
+
+        private void RobotButtonHandler(object sender, EventArgs e)
+        { 
+            InitialiseRobot((sender as Button).Text);
+        }
+
+        private void SetFilterChangerVisibility(bool input)
+        {
+            for (int i = 0; i < filterUpDowns.Count; i++)
+            {
+                if (input)
+                    filterUpDowns[i].Show();
+                else
+                    filterUpDowns[i].Hide();
+                filterUpDowns[i].Enabled = input;
+            }
+            for (int i = 0; i < filterLabels.Count; i++)
+                filterLabels[i].Visible = input;
+        }
+
+        List<Label> userLabels = new List<Label>();
+        private void SetUserControlLabels()
+        {
+            Bitmap b = new Bitmap(300, 300);
+            
+            Graphics g = Graphics.FromImage(b);
+            g.FillRectangle(new SolidBrush(this.BackColor), new Rectangle(0, 0, 300, 300));
+            SolidBrush brushBlack = new SolidBrush(Color.Black);
+            SolidBrush brushRed = new SolidBrush(Color.Red);
+            g.DrawString("Forwards:     ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 0));
+            g.DrawString("Left:         ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 30));
+            g.DrawString("Right:        ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 60));
+            g.DrawString("Backwards:    ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 90));
+            g.DrawString("Rotate left:  ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 120));
+            g.DrawString("Rotate right: ", new Font(FontFamily.GenericSansSerif, 15), brushRed, new Point(0, 150));
+
+            g.DrawString("W", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 0));
+            g.DrawString("A", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 30));
+            g.DrawString("S", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 60));
+            g.DrawString("D", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 90));
+            g.DrawString("Q ", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 120));
+            g.DrawString("E", new Font(FontFamily.GenericSansSerif, 15), brushBlack, new Point(150, 150));
+
+            picBoxUserLabels.Size = b.Size;
+            picBoxUserLabels.Image = b;
+            picBoxUserLabels.Visible = false;
+        }
+
         // "User" "Predator" "FSM"
         private void InitialiseRobot(string type)
         {
 
-            System.Threading.Thread.Sleep(2000);
+            //System.Threading.Thread.Sleep(2000);
             buttonPredator.Enabled = true;
             buttonUser.Enabled = true;
-            for (int i = 0; i < filterUpDowns.Count; i++)
-            {
-                filterUpDowns[i].Hide();
-                filterUpDowns[i].Enabled = false;
-            }
+            buttonPredatorFSM.Enabled = true;
+            picBoxUserLabels.Visible = false;
+            SetFilterChangerVisibility(false);
 
             if (robot != null)
                 robot.KillThreads();
@@ -206,36 +259,24 @@ namespace PredatorPreyAssignment
 
                 if (valueDict.Count == 0)
                     ReadDictValues();
-                (robot as Rovio.BaseArena).SetFilters(valueDict);
-                for (int i = 0; i < filterUpDowns.Count; i++)
-                {
-                    filterUpDowns[i].Show();
-                    filterUpDowns[i].Enabled = true;
-                }
 
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
                 robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
             }
             else if (type == "PredatorFSM")
             {
-                buttonPredatorFSM.Enabled = false;
-                //map = new Map(robot, Controls, 387, 18);
-                //map.UpdatePicBox += UpdatePictureBox;
+                if (map != null)
+                    map.Hide();
                 robot = new Rovio.PredatorStateMachine(robotURL, "user", "password", map, currentKeys);
                 (robot as Rovio.BaseArena).SourceImage += UpdateImage;
-                //map.SetUpdate(robot);
 
                 updateTimer.Start();
 
                 if (valueDict.Count == 0)
                     ReadDictValues();
                 (robot as Rovio.BaseArena).SetFilters(valueDict);
-                for (int i = 0; i < filterUpDowns.Count; i++)
-                {
-                    filterUpDowns[i].Show();
-                    filterUpDowns[i].Enabled = true;
-                }
-
+                SetFilterChangerVisibility(true);
                 robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
             }
@@ -245,12 +286,9 @@ namespace PredatorPreyAssignment
                     map.Hide();
                 robot = new Rovio.UserRobot(robotURL, "user", "password", map, currentKeys);
                 (robot as Rovio.UserRobot).SourceImage += UpdateImage;
+                picBoxUserLabels.Visible = true;
                 robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
-                //buttonUser.Enabled = false;
-
-                //buttonPredator.Enabled = true;
-
             }
 
             if (type == "Predator" || type == "PredatorFSM" || type == "User")
@@ -258,10 +296,8 @@ namespace PredatorPreyAssignment
                 picboxCameraImage.Location = new Point(20, 22);
                 picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
                 textBoxIP.Enabled = false;
-                
                 buttonPredator.Enabled = false;
                 buttonUser.Enabled = false;
-                buttonStop.Enabled = true;
                 buttonPredatorFSM.Enabled = false;
                 buttonStop.Enabled = true;
                 Focus();
@@ -292,12 +328,13 @@ namespace PredatorPreyAssignment
         // Update form picture box
         public void UpdateImage(Image image)
         {
-                picboxCameraImage.Image = image;
+               
 
             if (this.InvokeRequired)
             {
                 try
                 {
+                    picboxCameraImage.Image = image;
                     this.Invoke(new MethodInvoker(delegate { UpdateImage(image); }));
                 }
                 catch { }
@@ -320,28 +357,6 @@ namespace PredatorPreyAssignment
         }
 
         // Handle switch to user input state.
-        private void buttonUser_Click(object sender, EventArgs e)
-        {
-            InitialiseRobot("User");
-
-        }
-
-        // Handle switch to predator state.
-        private void buttonPredator_Click(object sender, EventArgs e)
-        {
-            
-           // robot_thread.Abort();
-            //while (robot_thread.ThreadState != System.Threading.ThreadState.Aborted)
-            //    System.Threading.Thread.Sleep(1);
-
-            
-
-            InitialiseRobot("Predator");
-            
-            //robot.API.Movement.Update();
-            //labelDocked.Text = robot.API.Movement.GetStatus();
-            
-        }
 
         // Key down - adds key to dictionary (if it is not already there).
         private void ImageViewer_KeyDown(object sender, KeyEventArgs e)
@@ -395,14 +410,5 @@ namespace PredatorPreyAssignment
             robotURL = textBoxIP.Text;
         }
 
-        private void buttonStop_Click(object sender, EventArgs e)
-        {
-            InitialiseRobot("");
-        }
-
-        private void buttonPredatorFSM_Click(object sender, EventArgs e)
-        {
-            InitialiseRobot("PredatorFSM");
-        }
     }
 }

@@ -80,6 +80,13 @@ namespace Rovio
             }
         }
 
+        private string Mode(List<string> list)
+        {
+            return list.GroupBy(x => x)
+                .Select(g => new { Value = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count).First().Value;
+        }
+
         public void Init()
         {
             try { API.Movement.GetLibNSVersion(); } // a dummy request

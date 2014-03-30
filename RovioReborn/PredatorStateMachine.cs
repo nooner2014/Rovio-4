@@ -12,10 +12,7 @@ namespace Rovio
         enum Tracking
         {
             SearchForGreen,
-            
-            BigSpin,
             GoingAroundBlock,
-
             Searching,
             OnScreen,
             Approaching,
@@ -39,13 +36,14 @@ namespace Rovio
             search.Start();
 
             System.Threading.Thread move = new System.Threading.Thread(SetFSMAction);
-            move.Start();
+            //move.Start();
 
             while (running && connected)
             {
                // System.Threading.Thread.Sleep(1000);
             }
         }
+
 
         protected void SetFSMAction()
         {
@@ -63,6 +61,7 @@ namespace Rovio
                    cumulativeAngle = 0;
                    searchingRotationCount = 0;
                    preyScreenPosition = preyRectangle;
+                   trackingState = Tracking.OnScreen;
                }
                // If prey is out of view but has been recently seen, search with rotation.
                if (preyRectangle == new System.Drawing.Rectangle(0, 0, 0, 0) && searchingRotationCount < 8)
@@ -72,7 +71,7 @@ namespace Rovio
                else if (searchingRotationCount >= 8 && trackingState != Tracking.OnScreen && trackingState != Tracking.GoingAroundBlock)
                {
                    
-                   trackingState = Tracking.BigSpin;
+                   trackingState = Tracking.SearchForGreen;
 
                }
 
@@ -83,7 +82,7 @@ namespace Rovio
 
                if (trackingState == Tracking.Searching)
                    Search();
-               else if (trackingState == Tracking.BigSpin)
+               else if (trackingState == Tracking.SearchForGreen)
                {
                    if (cumulativeAngle > 80 && IsObstacleSeen())
                        trackingState = Tracking.GoingAroundBlock;

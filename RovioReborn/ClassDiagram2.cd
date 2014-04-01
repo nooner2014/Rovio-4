@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Rovio.BaseArena" Collapsed="true">
-    <Position X="6.5" Y="10.5" Width="1.5" />
+    <Position X="9.25" Y="7.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>hAgCEIEaNogDAJIASwrYQSFAWpEBJAAAIIgCGBAABDQ=</HashCode>
       <FileName>ArenaBot.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.BaseRobot" Collapsed="true">
-    <Position X="8.25" Y="9" Width="1.5" />
+    <Position X="10.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>CBBAMABIQiAIIBFAYAAAJAhIQAmAAAAAgBAmARAAAAA=</HashCode>
+      <HashCode>CBBAMABIQqAIIBFAYAAAJAhIQAmAAAAAgBAmARAAAAA=</HashCode>
       <FileName>BaseRobot.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.PredatorMap" Collapsed="true">
-    <Position X="5.5" Y="12" Width="1.5" />
+    <Position X="8.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>PredatorMap.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Rovio.PredatorStateMachine" Collapsed="true">
-    <Position X="7.75" Y="12" Width="1.5" />
+  <Class Name="Rovio.PredatorSimple" Collapsed="true">
+    <Position X="10.25" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAiAAAAAAABAAAAAAAoAAIAAAAAAAAAAgQAA=</HashCode>
-      <FileName>PredatorStateMachine.cs</FileName>
+      <FileName>PredatorSimple.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.Robot" Collapsed="true">
-    <Position X="8.25" Y="7.75" Width="1.5" />
+    <Position X="10.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAAIAAAEAAAAAAAgAAAAwAEAAAQAAAAAAAA=</HashCode>
       <FileName>Rovio.cs</FileName>
@@ -78,48 +78,48 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Rovio.UserRobot" Collapsed="true">
-    <Position X="10" Y="10.5" Width="1.5" />
+    <Position X="12" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAgAAAIACAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
       <FileName>UserRobot.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.AStar" Collapsed="true">
-    <Position X="6.5" Y="8" Width="1.5" />
+    <Position X="7.75" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAEAAAACABAACgCAAAAAAAAgQAAAIASAAAQAAA=</HashCode>
       <FileName>AStar.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.MainForm" Collapsed="true">
-    <Position X="8.25" Y="6.75" Width="1.5" />
+    <Position X="7.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAQEMQAADJUSBJAAEC1BBUDAIEQBBQCJhAAAAIAhAA=</HashCode>
+      <HashCode>AEAQEMQAADZUSBJAAECVRBUDAIAQBBQCBhAAAAAAhAA=</HashCode>
       <FileName>MainForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.Map" Collapsed="true">
-    <Position X="6.5" Y="8.75" Width="1.5" />
+    <Position X="7.75" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQIAAQAgAMAAQCQGAhEAjIgAABBCQAKAKAIBDAAIQA=</HashCode>
       <FileName>Map.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PredatorPreyAssignment.Program" Collapsed="true">
-    <Position X="15.25" Y="8.5" Width="1.5" />
+    <Position X="18.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
       <FileName>Program.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="RovioReborn.Properties.Resources" Collapsed="true">
-    <Position X="17" Y="8.5" Width="1.5" />
+    <Position X="20.5" Y="7.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
     </TypeIdentifier>
   </Class>
   <Class Name="RovioReborn.Properties.Settings" Collapsed="true">
-    <Position X="18.75" Y="8.5" Width="1.5" />
+    <Position X="22.25" Y="7.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAABAAAAAAAAAAAAAAA=</HashCode>
     </TypeIdentifier>

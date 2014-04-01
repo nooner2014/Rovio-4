@@ -128,3 +128,16 @@ C:\Users\LABC19\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.csp
 C:\Users\LABC19\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\PredatorPreyAssignment.MainForm.resources
 C:\Users\LABC19\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.Properties.Resources.resources
 C:\Users\LABC19\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.csproj.GenerateResource.Cache
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\Rovio.exe
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\Rovio.pdb
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\dictvalues.txt
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\example.jpg
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\Rovio.exe
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\Rovio.pdb
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\AForge.dll
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\AForge.Imaging.dll
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\bin\Debug\AForge.Imaging.xml
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.csprojResolveAssemblyReference.cache
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\PredatorPreyAssignment.MainForm.resources
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.Properties.Resources.resources
+C:\Users\jordan-14100\Documents\GitHub\Rovio\RovioReborn\obj\x86\Debug\RovioReborn.csproj.GenerateResource.Cache

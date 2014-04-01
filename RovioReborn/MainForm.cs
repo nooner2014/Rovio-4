@@ -268,7 +268,7 @@ namespace PredatorPreyAssignment
             {
                 if (map != null)
                     map.Hide();
-                robot = new Rovio.PredatorStateMachine(robotURL, "user", "password", map, currentKeys);
+                robot = new Rovio.PredatorSimple(robotURL, "user", "password", map, currentKeys);
                 (robot as Rovio.BaseArena).SourceImage += UpdateImage;
 
                 updateTimer.Start();

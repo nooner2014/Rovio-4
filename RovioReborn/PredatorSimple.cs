@@ -6,24 +6,24 @@ using PredatorPreyAssignment;
 
 namespace Rovio
 {
-    class PredatorStateMachine : BaseArena
+    class PredatorSimple : BaseArena
     {
 
-        enum Tracking
+        enum PredatorState
         {
-            SearchForGreen,
-            GoingAroundBlock,
-            Searching,
+            SearchForObstacle,
+            GoingAroundObstacle,
+            ApproachingPrey,
             OnScreen,
-            Approaching,
+            SearchingForPrey,
             //Roaming,
         };
 
-        Tracking trackingState = Tracking.SearchForGreen;
+        PredatorState trackingState = PredatorState.SearchForObstacle;
 
 
 
-        public PredatorStateMachine(string address, string user, string password, Map m, Object k)
+        public PredatorSimple(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
         {
            // map = m;
@@ -61,35 +61,35 @@ namespace Rovio
                    cumulativeAngle = 0;
                    searchingRotationCount = 0;
                    preyScreenPosition = preyRectangle;
-                   trackingState = Tracking.OnScreen;
+                   trackingState = PredatorState.OnScreen;
                }
                // If prey is out of view but has been recently seen, search with rotation.
                if (preyRectangle == new System.Drawing.Rectangle(0, 0, 0, 0) && searchingRotationCount < 8)
-                   trackingState = Tracking.Searching;
+                   trackingState = PredatorState.SearchingForPrey;
 
                // If prey has been out of view and hasn't been found with rotation, start roaming.
-               else if (searchingRotationCount >= 8 && trackingState != Tracking.OnScreen && trackingState != Tracking.GoingAroundBlock)
+               else if (searchingRotationCount >= 8 && trackingState != PredatorState.OnScreen && trackingState != PredatorState.GoingAroundObstacle)
                {
                    
-                   trackingState = Tracking.SearchForGreen;
+                   trackingState = PredatorState.SearchForObstacle;
 
                }
 
-               else if (trackingState != Tracking.GoingAroundBlock)
-                   trackingState = Tracking.OnScreen;
+               else if (trackingState != PredatorState.GoingAroundObstacle)
+                   trackingState = PredatorState.OnScreen;
 
 
 
-               if (trackingState == Tracking.Searching)
+               if (trackingState == PredatorState.SearchingForPrey)
                    Search();
-               else if (trackingState == Tracking.SearchForGreen)
+               else if (trackingState == PredatorState.SearchForObstacle)
                {
                    if (cumulativeAngle > 80 && IsObstacleSeen())
-                       trackingState = Tracking.GoingAroundBlock;
+                       trackingState = PredatorState.GoingAroundObstacle;
                    else
                        Rotate90(1, 5);
                }
-               else if (trackingState == Tracking.GoingAroundBlock)
+               else if (trackingState == PredatorState.GoingAroundObstacle)
                    GoAroundBlock();
                else
                    Approach();
@@ -188,7 +188,7 @@ namespace Rovio
                 else if (IsObstacleSeen())
                     greenBlockState = GreenBlockState.StrafeAround;
                 else
-                    trackingState = Tracking.Searching;
+                    trackingState = PredatorState.SearchingForPrey;
             }
             else if (greenBlockState == GreenBlockState.StrafeAround)
             {
@@ -206,7 +206,7 @@ namespace Rovio
             { 
                 Rotate90(2, 2);
                 greenBlockState = GreenBlockState.InitialAproach;
-                trackingState = Tracking.Searching;
+                trackingState = PredatorState.SearchingForPrey;
 
             }
         }
@@ -239,7 +239,7 @@ namespace Rovio
                 RotateDirection(2, 4);
             else if (preyRectangle.Width < 80)
             {
-                trackingState = Tracking.Approaching;
+                trackingState = PredatorState.ApproachingPrey;
                 if (obstacleRectangle.Height > cameraDimensions.Y - 10 && obstacleRectangle.Width > 180)
                     Strafe(5, 1);
                 else if (obstacleRectangle.Height > cameraDimensions.Y - 10 && cameraDimensions.X - obstacleRectangle.Width > cameraDimensions.X - 180)

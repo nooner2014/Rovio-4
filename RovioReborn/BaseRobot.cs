@@ -30,66 +30,25 @@ namespace Rovio
         public Object mapLock = new Object();
 
         public delegate void ImageReady(Image image);
-        
 
 
+        protected System.Threading.Thread threadKeyboardInput;
         protected bool connected = true;
+
+        /// <summary>
+        /// Constructor - initialises variables for derived classes.
+        /// </summary>
+        /// <param name="address">URL of robot.</param>
+        /// <param name="user">Username for robot.</param>
+        /// <param name="password">Password for robot.</param>
+        /// <param name="m">Map to be used (null value is acceptable).</param>
+        /// <param name="k">Keyboard dictionary.</param>
         public BaseRobot(string address, string user, string password, Map m, Object k)
             : base(address, user, password)
         {
             map = m;
             keys = (List<int>)k;
-            Init();
-        }
 
-        public abstract void Start();
-
-
-        protected Point Lerp(Point oldPos, Point newPos, float multiplier)
-        {
-            Microsoft.Xna.Framework.Vector2 oldP = new Microsoft.Xna.Framework.Vector2(oldPos.X, oldPos.Y);
-            Microsoft.Xna.Framework.Vector2 newP = new Microsoft.Xna.Framework.Vector2(newPos.X, newPos.Y);
-
-            Microsoft.Xna.Framework.Vector2 brandNew = Microsoft.Xna.Framework.Vector2.Lerp(oldP, newP, multiplier);
-            return new Point((int)brandNew.X, (int)brandNew.Y);
-        }
-
-        protected void ImageGet()
-        {
-            while (running)
-            {
-                lock (commandLock)
-                {
-                    cameraImage = Camera.Image;
-                }
-            }
-        }
-
-        public abstract void KeyboardInput();
-
-        public void KeyboardStart()
-        {
-            while (running)
-            {
-                lock (commandLock)
-                {
-                    if (keys.Count == 1)
-                        KeyboardInput();
-                }
-            }
-        }
-
-        private string Mode(List<string> list)
-        {
-            return list.GroupBy(x => x)
-                .Select(g => new { Value = g.Key, Count = g.Count() })
-                .OrderByDescending(x => x.Count).First().Value;
-        }
-
-        protected System.Threading.Thread threadKeyboardInput;
-
-        public void Init()
-        {
             try { API.Movement.GetLibNSVersion(); } // a dummy request
             catch (Exception)
             {
@@ -101,7 +60,6 @@ namespace Rovio
                 Environment.Exit(0);
             }
 
-            
             cameraDimensions = System.Drawing.Point.Empty;
 
             lock (commandLock)
@@ -117,42 +75,104 @@ namespace Rovio
                 else
                     cameraDimensions = new System.Drawing.Point(640, 480);
             }
-            
+
             threadKeyboardInput = new System.Threading.Thread(KeyboardStart);
             threadKeyboardInput.Start();
             threadCameraImage = new System.Threading.Thread(ImageGet);
             threadCameraImage.Start();
         }
 
+        /// <summary>
+        /// Method to be implemented by the derived class.
+        /// </summary>
+        public abstract void Start();
+
+        /// <summary>
+        /// Linearly interpolate between two positions.
+        /// </summary>
+        /// <param name="oldPos">Original position.</param>
+        /// <param name="newPos">New position.</param>
+        /// <param name="multiplier">Weighting between the two positions (eg. 0.25 is a 75% weighting to the new position).</param>
+        /// <returns>New position with linear interpolation between input positions.</returns>
+        protected Point Lerp(Point oldPos, Point newPos, float multiplier)
+        {
+            Microsoft.Xna.Framework.Vector2 oldP = new Microsoft.Xna.Framework.Vector2(oldPos.X, oldPos.Y);
+            Microsoft.Xna.Framework.Vector2 newP = new Microsoft.Xna.Framework.Vector2(newPos.X, newPos.Y);
+            Microsoft.Xna.Framework.Vector2 brandNew = Microsoft.Xna.Framework.Vector2.Lerp(oldP, newP, multiplier);
+            return new Point((int)brandNew.X, (int)brandNew.Y);
+        }
+
+        /// <summary>
+        /// Updates the camera image.
+        /// </summary>
+        protected void ImageGet()
+        {
+            while (running)
+                lock (commandLock)
+                    cameraImage = Camera.Image;
+        }
+
+        /// <summary>
+        /// Keyboard input to be overridden in derived classes.
+        /// </summary>
+        protected abstract void KeyboardInput();
+
+        /// <summary>
+        /// Enters the overridden keyboard input method when a key is pressed.
+        /// </summary>
+        protected void KeyboardStart()
+        {
+            while (running)
+                lock (commandLock)
+                    if (keys.Count == 1)
+                        KeyboardInput();
+        }
+
+        /// <summary>
+        /// Find the modal value within a list (returns first occurance in the case of equal values).
+        /// </summary>
+        /// <typeparam name="T">Type of elements in the list.</typeparam>
+        /// <param name="list">List of elements within which to find the modal value</param>
+        /// <returns>The modal value of the list.</returns>
+        private T Mode<T>(List<T> list)
+        {
+            return list.GroupBy(x => x)
+                .Select(g => new { Value = g.Key, Count = g.Count() })
+                .OrderByDescending(a => a.Count).First().Value;
+        }
+
         //public delegate void ImageReady(Image image);
        // public event ImageReady SourceImage;
 
-        protected bool completed = false;
-
+        
+        /// <summary>
+        /// Begin the end of threads by setting the condition of all threads to false.
+        /// </summary>
         public void KillThreads()
         {
             running = false;
         }
 
-        ////////////////////////////////////////////////////
-        ///////////////////////Movement/////////////////////
-        ////////////////////////////////////////////////////
-
+        /// <summary>
+        /// Move Rovio forwards and backwards.
+        /// </summary>
+        /// <param name="iterations">Number of times to loop through.</param>
+        /// <param name="speed">Movement speed (1-10 highest to lowest). Negative value to move backwards.</param>
         protected void MoveForward(int iterations, int speed)
         {
             lock (commandLock)
-            {
                 for (int i = 0; i < iterations; i++)
-                {
                     if (speed < 0)
                         Drive.Backward(Math.Abs(speed));
                     else
                         Drive.Forward(speed);
-                }
-            }
-            //Drive.Stop();
         }
 
+        /// <summary>
+        /// Strafe left or right.
+        /// </summary>
+        /// <param name="iterations">Number of times to loop through.</param>
+        /// <param name="speed">Strafing speed (1-10 highest to lowest). Negative moves left, positive moves right.</param>
         protected void Strafe(int iterations, int speed)
         {
             lock (commandLock)
@@ -170,6 +190,11 @@ namespace Rovio
             }
         }
 
+        /// <summary>
+        /// Rotate the Rovio.
+        /// </summary>
+        /// <param name="iterations">Number of times to loop through.</param>
+        /// <param name="speed">Rotation speed (1-10 highest to lowest). Negative rotates counter-clockwise.</param>
         protected void RotateDirection(int iterations, int speed)
         {
             lock (commandLock)
@@ -180,69 +205,49 @@ namespace Rovio
                         Drive.RotateLeft(Math.Abs(speed));
                     else
                         Drive.RotateRight(speed);
-
-                    //cameraImage = Camera.Image;
                 }
                 Drive.Stop();
             }
         }
 
-        protected void Rotate90(int iterations=1, int speed=3)
+        /// <summary>
+        /// Rotate using the 'angle' web API command.
+        /// </summary>
+        /// <param name="iterations">
+        /// 1 = 15  degrees. 
+        /// 2 = 45  degrees. 
+        /// 3 = 90  degrees.
+        /// 4 = 180 degrees.
+        /// 5 = 360 degrees.</param>
+        /// <param name="speed">Speed of rotation (1-10 highest to lowest). Negative rotates counter-clockwise.</param>
+        protected void RotateByAngle(int iterations=1, int speed=3)
         {
             
             bool pos = true;
             if (iterations < 0)
                 pos = false;
-            double angle = 0;
             if (Math.Abs(iterations) == 1)
-            {
                 iterations = 1;
-                angle = 22;
-            }
             else if (Math.Abs(iterations) == 2)
-            {
                 iterations = 3;
-                angle = 45;
-            }
             else if (Math.Abs(iterations) == 3)
-            {
                 iterations = 7;
-                angle = 90;
-            }
             else if (Math.Abs(iterations) == 4)
-            {
                 iterations = 15;
-                angle = 180;
-            }
             else if (Math.Abs(iterations) == 5)
-            {
                 iterations = 30;
-                angle = 360;
-            }
 
             int direction = 18;
             if (!pos)
-            {
                 direction = 17;
-                angle = -angle;
-            }
 
             lock(commandLock)
                 Request("rev.cgi?Cmd=nav&action=18&drive=" + direction.ToString() + "&speed=" + speed.ToString() + "&angle=" + iterations.ToString());
-
-            cumulativeAngle += angle;
-
-            if (cumulativeAngle > 360)
-                cumulativeAngle -= 360;
-            else if (cumulativeAngle < 0)
-                cumulativeAngle += 360;
-                //cameraImage = Camera.Image;
-            
         }
-  
 
-
-
+        /// <summary>
+        /// Get extra information that may be useful to display on the form.
+        /// </summary>
         protected void GetFormInformation()
         {
             batteryStatus = API.Movement.Report.BatteryLevel;
@@ -250,7 +255,13 @@ namespace Rovio
             irSensor = IRSensor.Detection;        
         }
 
-        public void SetIndividualFilters(Dictionary<string, float> dict, ref AForge.Imaging.Filters.HSLFiltering filter, string colour)
+        /// <summary>
+        /// Pass in a filter to set up.
+        /// </summary>
+        /// <param name="dict">Dictionary of filter values.</param>
+        /// <param name="filter">Filter to be set.</param>
+        /// <param name="colour">Name of the colour filter being modified.</param>
+        public void SetIndividualFilters(Dictionary<string, float> dict, out AForge.Imaging.Filters.HSLFiltering filter, string colour)
         {
             filter = new AForge.Imaging.Filters.HSLFiltering();
             float left = 0f;
@@ -272,7 +283,11 @@ namespace Rovio
         //////////////////Image processing//////////////////
         ////////////////////////////////////////////////////
 
-        // Takes in an image and rewrites it to 24bpp RGB (e.g. for converting binary image to a compatible pixel format for further work).
+        /// <summary>
+        /// Takes in an image and rewrites it to 24bpp RGB (e.g. for converting binary image to a compatible pixel format for further work).
+        /// </summary>
+        /// <param name="bmp">Bitmap to be converted.</param>
+        /// <returns>24bpp RGB bitmap, visually identical to input Bitmap.</returns>
         protected Bitmap ConvertImageFormat(Bitmap bmp)
         {
             Bitmap outImage = new Bitmap((int)cameraDimensions.X, (int)cameraDimensions.Y, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -282,7 +297,13 @@ namespace Rovio
             return outImage;
         }
 
-        // Takes in black and white binary image and changes white to colour.
+        /// <summary>
+        /// Takes in black and white binary image and changes white to colour.
+        /// </summary>
+        /// <param name="overBmp">Top binary image (to be coloured).</param>
+        /// <param name="underBmp">Bottom image (to be overlayed).</param>
+        /// <param name="colour">Colour to change the white of the binary image to.</param>
+        /// <returns>Output image with the white of the original binary image overlayed and coloured.</returns>
         protected Bitmap ApplyColour(Bitmap overBmp, Bitmap underBmp, System.Drawing.Color colour)
         {
             Bitmap outImage = ConvertImageFormat(overBmp);
@@ -295,20 +316,37 @@ namespace Rovio
             return outImage;
         }
 
-        // Change input to greyscale.
+        /// <summary>
+        /// Change input to greyscale.
+        /// </summary>
+        /// <param name="image">Image to convert to greyscale.</param>
+        /// <returns>Converted greyscale image.</returns>
         protected Bitmap Greyscale(Bitmap image)
         {
             return AForge.Imaging.Filters.Grayscale.CommonAlgorithms.Y.Apply(image);
         }
 
-        // Change input to a binary image.
-        protected Bitmap Threshold(Bitmap image)
+        /// <summary>
+        /// Change input to a binary image.
+        /// </summary>
+        /// <param name="image">Image to convert to binary.</param>
+        /// <returns>Converted binary image (white and black).</returns>
+        protected Bitmap BinaryImage(Bitmap image)
         {
             AForge.Imaging.Filters.Threshold filter = new AForge.Imaging.Filters.Threshold(1);
             return filter.Apply(AForge.Imaging.Filters.Grayscale.CommonAlgorithms.Y.Apply(image));
         }
 
-        protected System.Drawing.Rectangle[] DetectObstacle(AForge.Imaging.Filters.HSLFiltering filter, Bitmap image, System.Drawing.Point minRect, ref Bitmap colourBitmap, System.Drawing.Point maxSize = default(System.Drawing.Point))
+        /// <summary>
+        /// Look at the input image and find a suitable blob.
+        /// </summary>
+        /// <param name="filter">HSL filter to use for image segmentation.</param>
+        /// <param name="image">Input image to segment.</param>
+        /// <param name="minRect">Minimum size of output blob.</param>
+        /// <param name="colourBitmap">Bitmap to write binary image to.</param>
+        /// <param name="maxSize">Maximum size of output blob (default value will allow any size).</param>
+        /// <returns>A rectangle array of all suitable blobs, or an empty array if no suitable blobs are found.</returns>
+        protected System.Drawing.Rectangle[] DetectObstacle(AForge.Imaging.Filters.HSLFiltering filter, Bitmap image, System.Drawing.Point minRect, out Bitmap colourBitmap, System.Drawing.Point maxSize = default(System.Drawing.Point))
         {
             Bitmap filtered;
 
@@ -316,7 +354,7 @@ namespace Rovio
 
             //short[,] structuringElement = new short[,] { { 0, 1, 0 }, { 1, 1, 1 }, { 0, 1, 0 } };
 
-            filtered = Threshold(filtered);
+            filtered = BinaryImage(filtered);
             //AForge.Imaging.Filters.Opening openingFilter = new AForge.Imaging.Filters.Opening(structuringElement);
             //filtered = openingFilter.Apply(filtered);
             colourBitmap = filtered;
@@ -340,7 +378,14 @@ namespace Rovio
             //return new System.Drawing.Rectangle[] {new System.Drawing.System.Drawing.Rectangle(0, 0, 0, 0)};
         }
 
-        // Draw a rectangle on the input image.
+        /// <summary>
+        /// Draw a rectangle on the input image.
+        /// </summary>
+        /// <param name="image">Bitmap to be drawn on.</param>
+        /// <param name="rect">Rectangle to be drawn.</param>
+        /// <param name="colour">Colour to draw rectacle.</param>
+        /// <param name="lineWeight">Weight of rectangle lines.</param>
+        /// <returns>Bitmap of input bitmap overlayed by rectangle.</returns>
         protected Bitmap DrawRect(Bitmap image, System.Drawing.Rectangle rect, System.Drawing.Color colour, float lineWeight)
         {
             Graphics rectPen = Graphics.FromImage(image);
@@ -348,7 +393,14 @@ namespace Rovio
             return image;
         }
 
-        // Draw a polygon with points from input array (e.g. for an irregular quadrilateral instead of a rectangle).
+        /// <summary>
+        /// Draw a polygon with points from input array (e.g. for an irregular quadrilateral instead of a rectangle).
+        /// </summary>
+        /// <param name="image">Bitmap image to be drawn on.</param>
+        /// <param name="pointArr">Array of points to be drawn to (in order of connections).</param>
+        /// <param name="colour">Colour to draw lines.</param>
+        /// <param name="lineWeight">Weight of lines to be drawn.</param>
+        /// <returns>Bitmap of input bitmap with point array lines drawn over.</returns>
         protected Bitmap DrawLineFromPoints(Bitmap image, System.Drawing.Point[] pointArr, System.Drawing.Color colour, float lineWeight)
         {
             Graphics rectPen = Graphics.FromImage(image);
@@ -369,7 +421,7 @@ namespace Rovio
             Bitmap filtered = filter.Apply(image);
 
             short[,] structuringElement = new short[,] { { 0, 1, 0 }, { 1, 1, 1 }, { 0, 1, 0 } };
-            filtered = Threshold(filtered, 1);
+            filtered = BinaryImage(filtered, 1);
             AForge.Imaging.Filters.Opening openingFilter = new AForge.Imaging.Filters.Opening(structuringElement);
             filtered = openingFilter.Apply(filtered);
 
@@ -416,7 +468,7 @@ namespace Rovio
 
             
             short[,] se = new short[,] {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
-            filtered = Threshold(filtered, 1);
+            filtered = BinaryImage(filtered, 1);
             AForge.Imaging.Filters.Opening ffFilter = new AForge.Imaging.Filters.Opening(se);
             filtered = ffFilter.Apply(filtered);
 

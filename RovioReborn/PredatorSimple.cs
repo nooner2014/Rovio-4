@@ -20,7 +20,9 @@ namespace Rovio
         };
 
         PredatorState trackingState = PredatorState.SearchForObstacle;
-
+        GreenBlockState greenBlockState = GreenBlockState.InitialAproach;
+        System.Threading.Thread threadSearch;
+        System.Threading.Thread threadMove;
 
 
         public PredatorSimple(string address, string user, string password, Map m, Object k)
@@ -30,14 +32,15 @@ namespace Rovio
             
         }
 
-        System.Threading.Thread threadSearch;
-        System.Threading.Thread threadMove;
+        /// <summary>
+        /// Overriden start method to be called from form and start threads.
+        /// </summary>
         public override void Start()
         {
             threadSearch = new System.Threading.Thread(SearchImage);
             threadSearch.Start();
 
-            threadMove = new System.Threading.Thread(SetFSMAction);
+            threadMove = new System.Threading.Thread(SetFiniteStateMachine);
             threadMove.Start();
 
             while (running && connected)
@@ -49,8 +52,10 @@ namespace Rovio
             threadMove.Join();
         }
 
-
-        protected void SetFSMAction()
+        /// <summary>
+        /// Begin the state machine.
+        /// </summary>
+        protected void SetFiniteStateMachine()
         {
             while (running)
             {
@@ -92,7 +97,7 @@ namespace Rovio
                    if (cumulativeAngle > 80 && IsObstacleSeen())
                        trackingState = PredatorState.GoingAroundObstacle;
                    else
-                       Rotate90(1, 5);
+                       RotateByAngle(1, 5);
                }
                else if (trackingState == PredatorState.GoingAroundObstacle)
                    GoAroundBlock();
@@ -116,7 +121,7 @@ namespace Rovio
                         trackingState = Tracking.BigSpin;
                     }
                     else
-                        Rotate90(1, 3);
+                        RotateByAngle(1, 3);
 
                     lock (commandLock)
                         Drive.Stop();
@@ -126,7 +131,7 @@ namespace Rovio
                     if (cumulativeAngle > 160 && IsObstacleSeen())
                         trackingState = Tracking.GoingAroundBlock;
                     else
-                        Rotate90(1, 3);
+                        RotateByAngle(1, 3);
 
                     lock (commandLock)
                         Drive.Stop();
@@ -175,6 +180,9 @@ namespace Rovio
             }
         }
 
+        /// <summary>
+        /// States exclusive to moving around the green block.
+        /// </summary>
         enum GreenBlockState
         { 
             InitialAproach,
@@ -183,7 +191,9 @@ namespace Rovio
             Rotate,
         }
 
-        GreenBlockState greenBlockState = GreenBlockState.InitialAproach;
+        /// <summary>
+        /// Move around the green block (obstacle).
+        /// </summary>
         protected void GoAroundBlock()
         {
             if (greenBlockState == GreenBlockState.InitialAproach)
@@ -209,20 +219,23 @@ namespace Rovio
             }
             else if (greenBlockState == GreenBlockState.Rotate)
             { 
-                Rotate90(2, 2);
+                RotateByAngle(2, 2);
                 greenBlockState = GreenBlockState.InitialAproach;
                 trackingState = PredatorState.SearchingForPrey;
 
             }
         }
 
+        /// <summary>
+        /// After losing prey, look around in the direction it was last seen.
+        /// </summary>
         protected void Search()
         {
             // Rotate to look for prey - direction of rotation depends on which side of the screen prey left from.
             if (preyScreenPosition.X < cameraDimensions.X / 2)
-                RotateDirection(2, -3);
+                RotateDirection(1, -3);
             else
-                RotateDirection(2, 3);
+                RotateDirection(1, 3);
             lock (commandLock)
                 Drive.Stop();
             // Keep track of how long we have been searching. If we've been looking for a while, resume roaming.
@@ -232,10 +245,13 @@ namespace Rovio
 
         }
 
+        /// <summary>
+        /// Move forward towards the prey if it is in view.
+        /// </summary>
         protected void Approach()
         {
 
-            // If prey is not centred, rotate to it. Otherwise threadMove forward until it's within a certain distance.
+            // If prey is not centred, rotate to it. Otherwise threadMove forward until it's within a certain threadFindWallDistance.
 
             searchingRotationCount = 0;
             if (preyScreenPosition.X < 0 + cameraDimensions.X / 5)
@@ -256,6 +272,7 @@ namespace Rovio
                 searchingRotationCount = 0;
         }
 
+        /*
         private void Roam()
         {
             //if (wallHeight > 20)
@@ -284,6 +301,6 @@ namespace Rovio
                     RotateDirection(2, 3);
             }
            // trackingState = Tracking.Roaming;
-        }
+        }*/
     }
 }

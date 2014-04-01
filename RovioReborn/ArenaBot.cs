@@ -14,15 +14,13 @@ namespace Rovio
 {
     abstract class BaseArena : BaseRobot
     {
-
-        
-
         // Filters
         AForge.Imaging.Filters.HSLFiltering greenFilter;
         AForge.Imaging.Filters.HSLFiltering redFilter;
         AForge.Imaging.Filters.HSLFiltering blueFilter;
         AForge.Imaging.Filters.HSLFiltering yellowFilter;
         AForge.Imaging.Filters.HSLFiltering whiteFilter;
+
 
         // Rectangles to draw on screen.
         protected System.Drawing.Rectangle preyScreenPosition = System.Drawing.Rectangle.Empty;
@@ -43,7 +41,6 @@ namespace Rovio
         protected Bitmap yellowColourBitmap;
         protected Bitmap whiteColourBitmap;
 
-        
 
         // Line points.
         protected System.Drawing.Point wallLeftPoint = System.Drawing.Point.Empty;
@@ -55,32 +52,31 @@ namespace Rovio
         protected System.Drawing.Point[] whiteTopWallPoints = new System.Drawing.Point[4];
         protected System.Drawing.Point[] whiteBottomWallPoints = new System.Drawing.Point[4];
 
-
         // Movement affecting variables.
         protected int wallLineHeight = 0;
         protected int searchingRotationCount = 8;
         protected Bitmap outputImage;
-        protected List<float> wallHeightList = new List<float>();
         protected List<char> wallDirectionList = new List<char>();
+        protected List<float> wallHeightList = new List<float>();
         
+
         // Variables for map.
         private bool preySeen = false;
-        public bool IsPreySeen() { return preySeen; }
         private float preyDistance = 0;
-        public float GetPreyDistance() { return preyDistance; }
         private bool obstacleSeen = false;
-        public bool IsObstacleSeen() { return obstacleSeen; }
         private float obstacleDistance = 0;
-        public float GetObstacleDistance() { return obstacleDistance; }
-        private float realLineThickness = 0;
+        private float blueLineThickness = 0;
         public double northDist = double.PositiveInfinity;
         public double westDist = double.PositiveInfinity;
         public double southDist = double.PositiveInfinity;
         public double eastDist = double.PositiveInfinity;
+        public double wallDistance = double.PositiveInfinity;
         protected char lastReadDirection;
 
-        public double wallDist = double.PositiveInfinity;
-
+        public bool IsPreySeen() { return preySeen; }
+        public bool IsObstacleSeen() { return obstacleSeen; }
+        public float GetPreyDistance() { return preyDistance; }
+        public float GetObstacleDistance() { return obstacleDistance; }
 
         protected int outputImageKey = 0;
 
@@ -94,7 +90,9 @@ namespace Rovio
             : base(address, user, password, m, k)
         { }
         
-        // Override base class' keyboard input method.
+        /// <summary>
+        /// Override base class' keyboard input method.
+        /// </summary>
         protected override void KeyboardInput()
         {
             try
@@ -104,21 +102,28 @@ namespace Rovio
             catch { }
         }
 
+        /// <summary>
+        /// Called from form. Set filters based on passed in dictionary values.
+        /// </summary>
+        /// <param name="values">Dictionary passed as object</param>
         public void SetFilters(object values)
         {
             Dictionary<string, float> dict = (Dictionary<string, float>)values;
 
-            SetIndividualFilters(dict, ref greenFilter, "green");
-            SetIndividualFilters(dict, ref redFilter, "red");
-            SetIndividualFilters(dict, ref blueFilter, "blue");
-            SetIndividualFilters(dict, ref yellowFilter, "yellow");
-            SetIndividualFilters(dict, ref whiteFilter, "white");
+            SetIndividualFilters(dict, out greenFilter, "green");
+            SetIndividualFilters(dict, out redFilter, "red");
+            SetIndividualFilters(dict, out blueFilter, "blue");
+            SetIndividualFilters(dict, out yellowFilter, "yellow");
+            SetIndividualFilters(dict, out whiteFilter, "white");
         }
 
-        // Takes multiple readings of the distance and averages it to eliminate error.
-        protected void FindInitialDistance(ref double final, bool moveAfter)
+        /// <summary>
+        /// Takes in multiple readings from the wall and returns the mean to eliminate error.
+        /// </summary>
+        /// <param name="final">Average of all gathered distances</param>
+        /// <param name="moveAfter">Whether to rotate 90 degrees after gathering data.</param>
+        protected void FindWallDistance(out double final, bool moveAfter)
         {
-
             List<double> arr = new List<double>();
             Stopwatch s = new Stopwatch();
             s.Start();
@@ -127,7 +132,7 @@ namespace Rovio
             while (s.ElapsedMilliseconds < 3000)
             {
               
-                dist = 6.5 / realLineThickness;
+                dist = 6.5 / blueLineThickness;
 
                 if (dist != 0 && !double.IsInfinity(dist))
                     arr.Add(Math.Abs(dist));
@@ -140,48 +145,18 @@ namespace Rovio
             if (arr.Count != 0)
                 final = arr.Average();
             else
-                final = 10;
+                final = 15;
 
             if (!running)
                 return;
             else if (moveAfter)
-                Rotate90(3, 3);
+                RotateByAngle(3, 3);
         }
 
-        protected void FindALLDISTANCE(ref double final)
-        {
-            while (running)
-            {
-                List<double> arr = new List<double>();
-                Stopwatch s = new Stopwatch();
-                s.Start();
-
-                double dist = 0;
-                while (s.ElapsedMilliseconds < 500)
-                {
-
-                    dist = 6.5 / realLineThickness;
-
-                    if (dist != 0 && !double.IsInfinity(dist))
-                        arr.Add(Math.Abs(dist));
-
-                    if (dist > 3)
-                        arr.Remove(dist);
-                    System.Threading.Thread.Sleep(50);
-                }
-
-                if (arr.Count != 0)
-                    final = arr.Average();
-                else
-                    final = 10;
-
-                Console.WriteLine("Distance: " + final);
-            }
- 
-        }
-
-        /* Old method for getting direction
-        public void GetNewCorrectDirection()
+        /// <summary>
+        /// Uses rectangle information to determine faced direction, and use data to assume the heading angle relative to north.
+        /// </summary>
+        public void FindHeading()
         {
             while (running)
             {
@@ -310,7 +285,7 @@ namespace Rovio
                 cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
             }
         }
-        */
+        
 
         /* Old method for getting angle
         public void MyNewTest()
@@ -377,7 +352,6 @@ namespace Rovio
         }
         */
 
-
         /* Old method for calculating direction
         // Once ten direction readings are calculated, find the mode (eliminates error).
         private void CalculateDirection()
@@ -420,13 +394,6 @@ namespace Rovio
         }
         */
         
-        ////////////////////////////////////////////////////
-        ///////////////////State machine////////////////////
-        ////////////////////////////////////////////////////
-
-        // All movement commands are made via this function (comment out in the main Predator function to stop Rovio moving).
-        
-
         /* Old initial localisation
         // First movements - rotate 90 degrees four times to localise.
         protected void InitialMovements()
@@ -440,10 +407,9 @@ namespace Rovio
         }
         */      
 
-        ////////////////////////////////////////////////////
-        /////Image processing and outputImage to screen/////
-        ////////////////////////////////////////////////////
-
+        /// <summary>
+        /// Calls various methods to segment images, evaluate their content, and judge findings based on gathered information.
+        /// </summary>
         protected void SearchImage()
         {
             while (running)
@@ -456,8 +422,8 @@ namespace Rovio
                     lastProcessedImage = outputImage;
                     FindRectangles();
                     MergeImages();
-                    DrawRectanlges();
-                    FindDirection();
+                    DrawRectangles();
+                    //FindDirection();
 
 
                     /*if (rectResult.Length > 1 && rectResult[1].Height > 5)
@@ -500,16 +466,18 @@ namespace Rovio
             }
         }
 
-        protected void FindRectangles()
+        /// <summary>
+        /// Called by SearchImage. Analyses blobs and 
+        /// </summary>
+        private void FindRectangles()
         {
             System.Drawing.Rectangle[] rectResult;
-
 
             // Pass filter and detected object from camera image. Referenced bitmap is set as binary image.
             // After image has been analysed, read through the outputImageKey array and sort.
 
             // Green block
-            rectResult = DetectObstacle(greenFilter, outputImage, new System.Drawing.Point(35, 35), ref greenColourBitmap);
+            rectResult = DetectObstacle(greenFilter, outputImage, new System.Drawing.Point(35, 35), out greenColourBitmap);
             if (rectResult.Length > 0)
             {
                 obstacleRectangle = rectResult[0];
@@ -522,7 +490,7 @@ namespace Rovio
             }
 
             // Red block (prey)
-            rectResult = DetectObstacle(redFilter, outputImage, new System.Drawing.Point(10, 10), ref redColourBitmap);
+            rectResult = DetectObstacle(redFilter, outputImage, new System.Drawing.Point(10, 10), out redColourBitmap);
             if (rectResult.Length > 0)
             {
                 preyRectangle = rectResult[0];
@@ -542,10 +510,10 @@ namespace Rovio
 
 
 
-            // Only need the blue line which intersects the centre to find distance.
+            // Only need the blue line which intersects the centre to find threadFindWallDistance.
 
             int lowestY = 100;
-            rectResult = DetectObstacle(blueFilter, wallImage, new System.Drawing.Point(60, 0), ref blueColourBitmap, new System.Drawing.Point(cameraDimensions.X, 50));
+            rectResult = DetectObstacle(blueFilter, wallImage, new System.Drawing.Point(60, 0), out blueColourBitmap, new System.Drawing.Point(cameraDimensions.X, 50));
             if (rectResult.Length > 0)
             {
                 bool firstFound = false;
@@ -588,7 +556,7 @@ namespace Rovio
 
 
             // North or south wall
-            rectResult = DetectObstacle(yellowFilter, wallImage, new System.Drawing.Point(50, 0), ref yellowColourBitmap);
+            rectResult = DetectObstacle(yellowFilter, wallImage, new System.Drawing.Point(50, 0), out yellowColourBitmap);
             if (rectResult.Length > 1 && rectResult[1].Y < rectResult[0].Y)
             {
                 System.Drawing.Rectangle temp = rectResult[1];
@@ -614,7 +582,7 @@ namespace Rovio
             }
 
             //West or east wall
-            rectResult = DetectObstacle(whiteFilter, wallImage, new System.Drawing.Point(80, 0), ref whiteColourBitmap);
+            rectResult = DetectObstacle(whiteFilter, wallImage, new System.Drawing.Point(80, 0), out whiteColourBitmap);
             if (rectResult.Length > 1 && rectResult[1].Y < rectResult[0].Y)
             {
                 System.Drawing.Rectangle temp = rectResult[1];
@@ -696,6 +664,9 @@ namespace Rovio
              */
         }
 
+        /// <summary>
+        /// Called by SearchImage. Merges images together for visual output to form and gathers edge points of rectangles.
+        /// </summary>
         protected void MergeImages()
         {
             redColourBitmap = ConvertImageFormat(redColourBitmap);
@@ -738,7 +709,7 @@ namespace Rovio
             //GetPoint(blueColourBitmap, wallLineRectangle.X + wallLineRectangle.Width - (wallLineRectangle.Width / 2), wallLineRectangle);
 
 
-            FindBlueLineHeight();
+            FindBlueLineThickness();
             outputImage = Greyscale(outputImage);
             outputImage = ConvertImageFormat(outputImage);
 
@@ -764,7 +735,10 @@ namespace Rovio
             outputImage = mFilter.Apply(outputImage);
         }
 
-        protected void DrawRectanlges()
+        /// <summary>
+        /// Called by SearchImage. Draws all rectangles to output image.
+        /// </summary>
+        protected void DrawRectangles()
         {
             if (obstacleRectangle != new System.Drawing.Rectangle(0, 0, 0, 0))
                 outputImage = DrawRect(outputImage, obstacleRectangle, System.Drawing.Color.DarkGreen, 3f);
@@ -799,42 +773,45 @@ namespace Rovio
                 if (whiteBottomWallPoints != null)
                     outputImage = DrawLineFromPoints(outputImage, whiteBottomWallPoints, System.Drawing.Color.Black, 3f);
             }
+
             if (blueLinePoints != null)
                 outputImage = DrawLineFromPoints(outputImage, blueLinePoints, System.Drawing.Color.DarkBlue, 3f);
             if (secondBlueLinePoints != null)
                 outputImage = DrawLineFromPoints(outputImage, secondBlueLinePoints, System.Drawing.Color.DarkBlue, 15f);
-
-
         }
 
+        /*
+        /// <summary>
+        /// Called by SearchImage. 
+        /// </summary>
         protected void FindDirection()
         {
             if (wallLineHeight != 0)
             {
-                /*
-                //if (yellowWallRectangleBottom.Width != 0 && yellowWallRectangleBottom.Height < 2 && yellowWallRectangleTop.Height > 2)
-                if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleBottom.Height < 1 && wallLineRectangle.Y-5 > yellowWallRectangleTop.Y)
-                wallDirectionList.Add('N');
-                else if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleTop.Height > yellowWallRectangleBottom.Height && yellowWallRectangleBottom.Height > 2)
-                    wallDirectionList.Add('S');
-                else if (whiteWallRectangleTop.X < wallLineRectangle.X + wallLineRectangle.Height)
-                    wallDirectionList.Add('E');
-                else if ((whiteWallRectangleTop.Width != 0 && whiteWallRectangleTop.Height > wallLineRectangle.Height) ||
-                    (whiteWallRectangleTop.Width != 0 && whiteWallRectangleTop.Height < whiteWallRectangleBottom.Height && whiteWallRectangleBottom.Height > 2))
-                    wallDirectionList.Add('W');
-                wallHeightList.Add(wallLineHeight);
-                wallLineHeight = 0;*/
-                /*
-                if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleBottom.Width == 0 && yellowWallRectangleTop.Y < blueLineRectangle.Y)
-                    wallDirectionList.Add('N');
-                else if ((whiteWallRectangleTop.Height != 0 && whiteWallRectangleTop.Height < whiteWallRectangleBottom.Height)
-                    && Math.Abs(whiteWallRectangleTop.X-whiteWallRectangleBottom.X) < 15)
-                    wallDirectionList.Add('W');
-                else if (yellowWallRectangleBottom.Width != 0 && yellowWallRectangleTop.Height > yellowWallRectangleBottom.Height)
-                    wallDirectionList.Add('S');
-                else if(whiteTopWallPoints[0].Y > blueLinePoints[0].Y)
-                    wallDirectionList.Add('E');
-                */
+                
+                ////if (yellowWallRectangleBottom.Width != 0 && yellowWallRectangleBottom.Height < 2 && yellowWallRectangleTop.Height > 2)
+                //if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleBottom.Height < 1 && wallLineRectangle.Y-5 > yellowWallRectangleTop.Y)
+                //wallDirectionList.Add('N');
+                //else if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleTop.Height > yellowWallRectangleBottom.Height && yellowWallRectangleBottom.Height > 2)
+                //    wallDirectionList.Add('S');
+                //else if (whiteWallRectangleTop.X < wallLineRectangle.X + wallLineRectangle.Height)
+                //    wallDirectionList.Add('E');
+                //else if ((whiteWallRectangleTop.Width != 0 && whiteWallRectangleTop.Height > wallLineRectangle.Height) ||
+                //    (whiteWallRectangleTop.Width != 0 && whiteWallRectangleTop.Height < whiteWallRectangleBottom.Height && whiteWallRectangleBottom.Height > 2))
+                //    wallDirectionList.Add('W');
+                //wallHeightList.Add(wallLineHeight);
+                //wallLineHeight = 0;
+                
+                //if (yellowWallRectangleTop.Width != 0 && yellowWallRectangleBottom.Width == 0 && yellowWallRectangleTop.Y < blueLineRectangle.Y)
+                //    wallDirectionList.Add('N');
+                //else if ((whiteWallRectangleTop.Height != 0 && whiteWallRectangleTop.Height < whiteWallRectangleBottom.Height)
+                //    && Math.Abs(whiteWallRectangleTop.X-whiteWallRectangleBottom.X) < 15)
+                //    wallDirectionList.Add('W');
+                //else if (yellowWallRectangleBottom.Width != 0 && yellowWallRectangleTop.Height > yellowWallRectangleBottom.Height)
+                //    wallDirectionList.Add('S');
+                //else if(whiteTopWallPoints[0].Y > blueLinePoints[0].Y)
+                //    wallDirectionList.Add('E');
+                
 
                 if (yellowWallRectangleTop.Width > whiteWallRectangleBottom.Width)
                 {
@@ -859,8 +836,15 @@ namespace Rovio
                 wallLineHeight = 0;
             }
         }
+        */
 
-        // Searches down from X position of rectangle to find actual height of segmented object in rectangle.
+        /// <summary>
+        /// Searches down from X position of rectangle to find actual height of segmented object in rectangle.
+        /// </summary>
+        /// <param name="bmp">Binary image on black background.</param>
+        /// <param name="rect">Rectangle for search region.</param>
+        /// <param name="minimumLimit">Make use of a hard minimum size limit of 5,5.</param>
+        /// <returns>Actual corners rectangle.</returns>
         protected System.Drawing.Point[] GetWallPoints(Bitmap bmp, System.Drawing.Rectangle rect, bool minimumLimit)
         {
             System.Drawing.Point topRight = new System.Drawing.Point(0, 0);
@@ -871,7 +855,6 @@ namespace Rovio
             {
                 int lowestPoint = 0;
                 int highestPoint = 0;
-                int errorCount = 0;
                 int x = 0;
                 if (j == 0)
                     x = rect.X + 10;
@@ -921,12 +904,13 @@ namespace Rovio
             return new System.Drawing.Point[] { emptyPoint, emptyPoint, emptyPoint, emptyPoint };
         }
 
-        protected void FindBlueLineHeight()
+        /// <summary>
+        /// Analyses the blue line rectangle to find its thickness.
+        /// </summary>
+        protected void FindBlueLineThickness()
         {
             float topPoint = 0;
             float bottomPoint = 0;
-            System.Drawing.Color bCol = new System.Drawing.Color();
-
 
             System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, 0, 0);
             System.Drawing.Point[] points = { new System.Drawing.Point(0, 0) };
@@ -952,14 +936,11 @@ namespace Rovio
                     else
                         bottomPoint = i;
                 }
-                //else
-                //Console.WriteLine("hi");
             }
             if (!(rect.Height > 200 && Math.Abs(points[0].Y - points[1].Y) < 40))
-                realLineThickness = bottomPoint - topPoint;
+                blueLineThickness = bottomPoint - topPoint;
             else
-                realLineThickness = 0;
-            //Console.WriteLine("LINEHEIHGT " + lineHeight);
+                blueLineThickness = 0;
         }
     }
 }

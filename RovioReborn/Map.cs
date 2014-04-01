@@ -14,15 +14,8 @@ namespace PredatorPreyAssignment
 {
     class Map
     {
-
-        enum Type
-        { 
-            Prey,
-            Obstacle,
-            Other,
-        }
         Rovio.BaseArena robot;
-
+        
         // Different picturebox for each image element, with accompanying bitmap.
         private PictureBox picBoxMap;
         private PictureBox picBoxPath;
@@ -55,9 +48,9 @@ namespace PredatorPreyAssignment
         public event UpdatePictureBox UpdatePicBox;
         public void Hide() { picBoxMap.Hide(); }
 
-        ////////////////////////////////////////////////////
-        //////////////////Initialisation////////////////////
-        ////////////////////////////////////////////////////
+        bool testBool = false;
+
+        private DPoint destination = new DPoint(-1, -1);
 
         public Map(Rovio.BaseArena r, Control.ControlCollection c, int x, int y)
         {
@@ -109,7 +102,16 @@ namespace PredatorPreyAssignment
             
         }
 
-        // Adds new picture box to scene and sends bitmap + dimensions.
+        /// <summary>
+        /// Adds new picture box to scene and sends bitmap + dimensions.
+        /// </summary>
+        /// <param name="c">Form control collection.</param>
+        /// <param name="p">PictureBox to assign.</param>
+        /// <param name="b">Bitmap to assign to PictureBox.</param>
+        /// <param name="width">Image width.</param>
+        /// <param name="height">Image height.</param>
+        /// <param name="x">Position X.</param>
+        /// <param name="y">Position Y.</param>
         private void SetPictureBox(Control.ControlCollection c, ref PictureBox p, ref Bitmap b, int width, int height, int x, int y)
         {
             b = new Bitmap(width, height);
@@ -123,7 +125,9 @@ namespace PredatorPreyAssignment
             c.Add(p);
         }
 
-        // Draws the grid to screen (only called once, at load).
+        /// <summary>
+        /// Draws the grid to screen (only called once, at load).
+        /// </summary>
         private void DrawGraphics()
         {
   
@@ -138,7 +142,6 @@ namespace PredatorPreyAssignment
                 g.FillEllipse(new SolidBrush(System.Drawing.Color.RosyBrown), new DRectangle(0, 0, 24, 27));
                 g.FillRectangle(new SolidBrush(System.Drawing.Color.IndianRed), new DRectangle(12, 0, 2, 13));
             }
-
 
             using (Graphics g = Graphics.FromImage(bObstacle))
                 g.FillRectangle(new SolidBrush(System.Drawing.Color.Green), new DRectangle(0, 0, 30, 30));
@@ -165,8 +168,10 @@ namespace PredatorPreyAssignment
             }
         }
 
-        // Called from robot once initial spins are made. Sets the first localisation (always pointing north).
-        // Uses the nearest two distances for each opposite direction to localise as accurately as possible.
+        /// <summary>
+        /// Called from robot once initial spins are made. Sets the first localisation (always pointing north).
+        /// Uses the nearest two distances for each opposite direction to localise as accurately as possible.
+        /// </summary>
         public void SetInitialPoint()
         {
             double x = 0;
@@ -201,11 +206,12 @@ namespace PredatorPreyAssignment
         }
 
 
-        ////////////////////////////////////////////////////
-        //////////////Probabilistic methods/////////////////
-        ////////////////////////////////////////////////////
-
-        // Values being used.
+        /// <summary>
+        /// Get the probability to affect new Bayesian filtering value.
+        /// </summary>
+        /// <param name="map">If map has detected an object.</param>
+        /// <param name="input">If the input sensor has detected an object.</param>
+        /// <returns>Probability based on reliability of map and sensors.</returns>
         private double GetProbability(bool map, bool input)
         {
             if (map && input)
@@ -218,6 +224,12 @@ namespace PredatorPreyAssignment
                 return 0.49;
         }
 
+        /// <summary>
+        /// Get the probability of prey, to affect new Bayesian filtering value.
+        /// </summary>
+        /// <param name="map">If map has detected an object.</param>
+        /// <param name="input">If the input sensor has detected an object.</param>
+        /// <returns>Probability based on reliability of map and sensors.</returns>
         private double GetPreyProbability(bool map, bool input)
         {
             if (map && input)
@@ -230,8 +242,13 @@ namespace PredatorPreyAssignment
                 return 0.89;
         }
 
-        // Calculates new map for whichever input has been given
-        private void Bayes(bool lookingForPrey, bool[,] inputSensor, ref double[,]probability)
+        /// <summary>
+        /// Sets probabalistic values to map.
+        /// </summary>
+        /// <param name="lookingForPrey">If the prey is being searched for, or something else.</param>
+        /// <param name="inputMap">Which map is being affected (e.g. obstacle map, prey map).</param>
+        /// <param name="probability">Which probability array to update (e.g. obstacle map, prey map).</param>
+        private void Bayes(bool lookingForPrey, bool[,] inputMap, ref double[,]probability)
         {
             double threshold = 0.95;
 
@@ -249,7 +266,7 @@ namespace PredatorPreyAssignment
                     if (!isCellVisible[i, j]) // If cell can't be seen, it is ignored.
                         continue;
 
-                    input = inputSensor[i, j];
+                    input = inputMap[i, j];
                     mapProb = probability[i, j];
                     map = (mapProb < threshold);
 
@@ -286,9 +303,10 @@ namespace PredatorPreyAssignment
                 //destination = new DPoint(-1, -1);
         }
 
-        bool testBool = false;
-
-        private DPoint destination = new DPoint(-1, -1);
+        /// <summary>
+        /// Begin the update function and assign a robot to the map.
+        /// </summary>
+        /// <param name="r">Input robot.</param>
         public void SetUpdate(Rovio.BaseArena r)
         {
             robot = r;
@@ -298,7 +316,9 @@ namespace PredatorPreyAssignment
         }
 
         
-
+        /// <summary>
+        /// Update function of map.
+        /// </summary>
         private void Update(object sender, EventArgs e)
         {
             //picBoxCone.Location = new Point(picBoxRovio.Location.X - (picBoxCone.Width / 2) + (picBoxRovio.Width/2),  (picBoxCone.Height/2) + (picBoxRovio.Height));
@@ -306,7 +326,7 @@ namespace PredatorPreyAssignment
 
 
             //robot.cumulativeAngle = 0;
-            //picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDist*100));
+            //picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDistance*100));
 
             testBool = true;
             if (testBool)
@@ -323,14 +343,14 @@ namespace PredatorPreyAssignment
                 first *= new Vector2(260, 300) * 0.5f;
 
 
-               // Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDist * 100));
+               // Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDistance * 100));
 
                 
 
                 System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
                 m.Translate((int)first.X, (int)first.Y);
                 m.RotateAt((float)robot.cumulativeAngle, new DPoint(0, 0));
-                m.Translate(0f, (float)(robot.wallDist*100));
+                m.Translate(0f, (float)(robot.wallDistance*100));
                 DPoint[] newPos = { new DPoint(0, 0) };
                 m.TransformPoints(newPos);
 
@@ -580,7 +600,12 @@ namespace PredatorPreyAssignment
              
         }
 
-        // Finds if a point resides within the points of a polygon (for this purpose, the viewing cone).
+        /// <summary>
+        /// Finds if a point resides within the points of a polygon.
+        /// </summary>
+        /// <param name="p">Point to check.</param>
+        /// <param name="poly">Array of points to check against.</param>
+        /// <returns>Whether the input point lies within the point array.</returns>
         bool PointInPolygon(DPoint p, DPoint[] poly)
         {
             DPoint p1, p2;

@@ -18,7 +18,9 @@ namespace Rovio
 
         }
 
-
+        /// <summary>
+        /// Override 
+        /// </summary>
         public override void Start()
         {
             Bitmap outputImage = new Bitmap(cameraDimensions.X, cameraDimensions.Y);
@@ -37,7 +39,7 @@ namespace Rovio
         // = Convert.ToInt32(a);
 
         // Take pressed keys for user movement. 
-        public override void KeyboardInput()
+        protected override void KeyboardInput()
         {
             // while (true)
             //{

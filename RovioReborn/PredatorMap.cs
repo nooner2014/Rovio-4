@@ -8,13 +8,19 @@ namespace Rovio
 {
     class PredatorMap : BaseArena
     {
+
+        System.Threading.Thread threadFindHeading;
+        System.Threading.Thread threadFindWallDistance;
+
         public PredatorMap(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
         {
-           // map = m;
             
         }
 
+        /// <summary>
+        /// Overriden start method to call from main and begin threads.
+        /// </summary>
         public override void Start()
         {
             //System.Threading.Thread getImage = new System.Threading.Thread(GetImage);
@@ -26,17 +32,17 @@ namespace Rovio
             // System.Threading.Thread source = new System.Threading.Thread(ImageGet);
             //source.Start();
 
-            //System.Threading.Thread threadMove = new System.Threading.Thread(SetFSMAction);
-            System.Threading.Thread move = new System.Threading.Thread(InitialMovements);
+            //System.Threading.Thread threadMove = new System.Threading.Thread(SetFiniteStateMachine);
+            //System.Threading.Thread move = new System.Threading.Thread(InitialMovements);
             //threadMove.Start();
 
 
 
-            System.Threading.Thread myT = new System.Threading.Thread(GetNewCorrectDirection);
-            myT.Start();
+            threadFindHeading = new System.Threading.Thread(FindHeading);
+            threadFindHeading.Start();
 
-            System.Threading.Thread distance = new System.Threading.Thread(() => FindALLDISTANCE(ref wallDist));
-            distance.Start();
+            threadFindWallDistance = new System.Threading.Thread(() => FindWallDistance(out wallDistance, false));
+            threadFindWallDistance.Start();
 
             while (running && connected)
             {
@@ -50,7 +56,7 @@ namespace Rovio
                 //lock (commandLock)
                 //lock (mapLock)
                 //if (!(trackingState == Tracking.Initial))
-                //Rotate90(1, 6);
+                //RotateByAngle(1, 6);
 
                 
                 //FindDirection();

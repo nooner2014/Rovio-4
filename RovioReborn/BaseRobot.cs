@@ -41,7 +41,7 @@ namespace Rovio
         /// <param name="address">URL of robot.</param>
         /// <param name="user">Username for robot.</param>
         /// <param name="password">Password for robot.</param>
-        /// <param name="m">Map to be used (null value is acceptable).</param>
+        /// <param name="matrix">Map to be used (null value is acceptable).</param>
         /// <param name="k">Keyboard dictionary.</param>
         public BaseRobot(string address, string user, string password, Map m, Object k)
             : base(address, user, password)
@@ -129,7 +129,7 @@ namespace Rovio
         }
 
         /// <summary>
-        /// Find the modal value within a list (returns first occurance in the case of equal values).
+        /// Find the modal value within a list (returns newP occurance in the case of equal values).
         /// </summary>
         /// <typeparam name="T">Type of elements in the list.</typeparam>
         /// <param name="list">List of elements within which to find the modal value</param>
@@ -284,7 +284,7 @@ namespace Rovio
         ////////////////////////////////////////////////////
 
         /// <summary>
-        /// Takes in an image and rewrites it to 24bpp RGB (e.g. for converting binary image to a compatible pixel format for further work).
+        /// Takes in an image and rewrites it to 24bpp RGB (e.graphics. for converting binary image to a compatible pixel format for further work).
         /// </summary>
         /// <param name="bmp">Bitmap to be converted.</param>
         /// <returns>24bpp RGB bitmap, visually identical to input Bitmap.</returns>
@@ -394,7 +394,7 @@ namespace Rovio
         }
 
         /// <summary>
-        /// Draw a polygon with points from input array (e.g. for an irregular quadrilateral instead of a rectangle).
+        /// Draw a polygon with points from input array (e.graphics. for an irregular quadrilateral instead of a rectangle).
         /// </summary>
         /// <param name="image">Bitmap image to be drawn on.</param>
         /// <param name="pointArr">Array of points to be drawn to (in order of connections).</param>

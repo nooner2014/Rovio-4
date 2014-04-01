@@ -8,8 +8,10 @@ using Microsoft.Xna.Framework;
 
 
 using DColor = System.Drawing.Color;
+using DMatrix = System.Drawing.Drawing2D.Matrix;
 using DRectangle = System.Drawing.Rectangle;
 using DPoint = System.Drawing.Point;
+
 namespace PredatorPreyAssignment
 {
     class Map
@@ -51,7 +53,8 @@ namespace PredatorPreyAssignment
         bool testBool = false;
 
         private DPoint destination = new DPoint(-1, -1);
-
+        Graphics graphics;
+        DMatrix matrix;
         public Map(Rovio.BaseArena r, Control.ControlCollection c, int x, int y)
         {
             robot = r;
@@ -130,46 +133,47 @@ namespace PredatorPreyAssignment
         /// </summary>
         private void DrawGraphics()
         {
-  
-            using (Graphics g = Graphics.FromImage(bMap))
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), new DRectangle(0, 0, bMap.Width, bMap.Height));
+            
 
-            using (Graphics g = Graphics.FromImage(bPrey))
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new DRectangle(0, 0, 3, 3));
+            using (graphics = Graphics.FromImage(bMap))
+                graphics.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), new DRectangle(0, 0, bMap.Width, bMap.Height));
 
-            using (Graphics g = Graphics.FromImage(bRovio))
+            using (graphics = Graphics.FromImage(bPrey))
+                graphics.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new DRectangle(0, 0, 3, 3));
+
+            using (graphics = Graphics.FromImage(bRovio))
             {
-                g.FillEllipse(new SolidBrush(System.Drawing.Color.RosyBrown), new DRectangle(0, 0, 24, 27));
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.IndianRed), new DRectangle(12, 0, 2, 13));
+                graphics.FillEllipse(new SolidBrush(System.Drawing.Color.RosyBrown), new DRectangle(0, 0, 24, 27));
+                graphics.FillRectangle(new SolidBrush(System.Drawing.Color.IndianRed), new DRectangle(12, 0, 2, 13));
             }
 
-            using (Graphics g = Graphics.FromImage(bObstacle))
-                g.FillRectangle(new SolidBrush(System.Drawing.Color.Green), new DRectangle(0, 0, 30, 30));
+            using (graphics = Graphics.FromImage(bObstacle))
+                graphics.FillRectangle(new SolidBrush(System.Drawing.Color.Green), new DRectangle(0, 0, 30, 30));
 
-            using (Graphics g = Graphics.FromImage(bMap))
+            using (graphics = Graphics.FromImage(bMap))
             {
                 for (int i = 1; i < maxY; i++)
-                    g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(0, i * 10), new System.Drawing.Point(260, i * 10));
+                    graphics.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(0, i * 10), new System.Drawing.Point(260, i * 10));
 
                 for (int i = 1; i < maxX; i++)
-                    g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(i * 10, 0), new System.Drawing.Point(i * 10, 300));
+                    graphics.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(i * 10, 0), new System.Drawing.Point(i * 10, 300));
 
                 SolidBrush brush = new SolidBrush(System.Drawing.Color.DarkBlue);
-                g.FillRectangle(brush, new DRectangle(0, 0, 30, 100));
-                g.FillRectangle(brush, new DRectangle(bMap.Width - 30, 0, 30, 100));
-                g.FillRectangle(brush, new DRectangle(0, bMap.Height - 100, 30, 100));
-                g.FillRectangle(brush, new DRectangle(bMap.Width - 30, bMap.Height - 100, 30, 100));
+                graphics.FillRectangle(brush, new DRectangle(0, 0, 30, 100));
+                graphics.FillRectangle(brush, new DRectangle(bMap.Width - 30, 0, 30, 100));
+                graphics.FillRectangle(brush, new DRectangle(0, bMap.Height - 100, 30, 100));
+                graphics.FillRectangle(brush, new DRectangle(bMap.Width - 30, bMap.Height - 100, 30, 100));
             }
 
-            using (Graphics g = Graphics.FromImage(bCone))
+            using (graphics = Graphics.FromImage(bCone))
             {
                 DPoint[] conePoints = { new System.Drawing.Point(bCone.Width / 2, bCone.Height), new System.Drawing.Point(0, 0), new System.Drawing.Point(bCone.Width, 0) };
-                g.FillPolygon(new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(100, DColor.ForestGreen)), conePoints);
+                graphics.FillPolygon(new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(100, DColor.ForestGreen)), conePoints);
             }
         }
 
         /// <summary>
-        /// Called from robot once initial spins are made. Sets the first localisation (always pointing north).
+        /// Called from robot once initial spins are made. Sets the newP localisation (always pointing north).
         /// Uses the nearest two distances for each opposite direction to localise as accurately as possible.
         /// </summary>
         public void SetInitialPoint()
@@ -246,8 +250,8 @@ namespace PredatorPreyAssignment
         /// Sets probabalistic values to map.
         /// </summary>
         /// <param name="lookingForPrey">If the prey is being searched for, or something else.</param>
-        /// <param name="inputMap">Which map is being affected (e.g. obstacle map, prey map).</param>
-        /// <param name="probability">Which probability array to update (e.g. obstacle map, prey map).</param>
+        /// <param name="inputMap">Which map is being affected (e.graphics. obstacle map, prey map).</param>
+        /// <param name="probability">Which probability array to update (e.graphics. obstacle map, prey map).</param>
         private void Bayes(bool lookingForPrey, bool[,] inputMap, ref double[,]probability)
         {
             double threshold = 0.95;
@@ -280,6 +284,7 @@ namespace PredatorPreyAssignment
                         maxIndex = new DPoint(i, j);
                         maxProb = newProb;
                     }
+
                     if (newProb < 0.95 && newProb > 0.05)
                         probability[i, j] = newProb;
                     else if (newProb > 0.75 && !lookingForPrey)
@@ -315,10 +320,36 @@ namespace PredatorPreyAssignment
             timer.Start();
         }
 
-        
+
+        private void SetNewRovioPosition()
+        {
+            Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
+            Vector2 newP = new Vector2(0, -1);
+
+            // Find the angle of the Rovio on the perimeter of the arena.
+            newP = Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(MathHelper.ToRadians((float)robot.cumulativeAngle)));
+            newP /= MathHelper.Max(Math.Abs(newP.X), Math.Abs(newP.Y));
+            newP += Vector2.One;
+            newP *= new Vector2(260, 300) * 0.5f;
+
+            // Translate into the arena from the perimeter.
+            using (matrix = new System.Drawing.Drawing2D.Matrix())
+            {
+                matrix.Translate((int)newP.X, (int)newP.Y);
+                matrix.RotateAt((float)robot.cumulativeAngle, new DPoint(0, 0));
+                matrix.Translate(0f, (float)(robot.wallDistance * 100));
+                DPoint[] newPos = { new DPoint(0, 0) };
+                matrix.TransformPoints(newPos);
+                newP = Vector2.Lerp(oldP, new Vector2(newPos[0].X, newPos[0].Y), 0.1f);
+                picBoxRovio.Location = new DPoint((int)newP.X, (int)newP.Y);   
+            }
+        }
+
+
         /// <summary>
         /// Update function of map.
         /// </summary>
+        /// 
         private void Update(object sender, EventArgs e)
         {
             //picBoxCone.Location = new Point(picBoxRovio.Location.X - (picBoxCone.Width / 2) + (picBoxRovio.Width/2),  (picBoxCone.Height/2) + (picBoxRovio.Height));
@@ -326,74 +357,42 @@ namespace PredatorPreyAssignment
 
 
             //robot.cumulativeAngle = 0;
-            //picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDistance*100));
+            //picBoxRovio.Location = new DPoint(50, 10);//(int)(robot.wallDistance*100));
 
-            testBool = true;
-            if (testBool)
-            {
-
-
-                Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
-
-                Vector2 first = new Vector2(0, -1);
-
-                first = Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(MathHelper.ToRadians((float)robot.cumulativeAngle)));
-                first /= MathHelper.Max(Math.Abs(first.X), Math.Abs(first.Y));
-                first += Vector2.One;
-                first *= new Vector2(260, 300) * 0.5f;
-
-
-               // Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDistance * 100));
-
-                
-
-                System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
-                m.Translate((int)first.X, (int)first.Y);
-                m.RotateAt((float)robot.cumulativeAngle, new DPoint(0, 0));
-                m.Translate(0f, (float)(robot.wallDistance*100));
-                DPoint[] newPos = { new DPoint(0, 0) };
-                m.TransformPoints(newPos);
-
-                Vector2 brandNew = Vector2.Lerp(oldP, new Vector2(newPos[0].X, newPos[0].Y), 0.1f);
-                picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);                
-            
-            
-            }
             lock (robot.mapLock)
             {
                 Bayes(true, preySensor, ref preyProbability);
                 Bayes(false, obstacleSensor, ref obstacleProbability);
                 bBayes = new Bitmap(bMap.Size.Width, bMap.Size.Height);
-                Graphics g = Graphics.FromImage(bBayes);
+                SetNewRovioPosition(); 
 
+                // Run AStar if there is a suitable destination and draw it on the map.
+                using (graphics = Graphics.FromImage(bBayes))
+                {
+                    AStar astar = new AStar(finalMap.GetLength(0), finalMap.GetLength(1));
+                    astar.Build(finalMap, new DPoint(destination.X, destination.Y), new DPoint((picBoxRovio.Location.X / 10) + (picBoxRovio.Width / 10 / 2), picBoxRovio.Location.Y / 10));
 
-                
-                AStar aa = new AStar(finalMap.GetLength(0), finalMap.GetLength(1));
-                aa.Build(finalMap, new DPoint(destination.X, destination.Y), 
-                    new DPoint((picBoxRovio.Location.X / 10) + (picBoxRovio.Width/10/2), picBoxRovio.Location.Y / 10));
-                
                     for (int i = 0; i < maxX; i++)
                     {
                         for (int j = 0; j < maxY; j++)
                         {
-                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new DRectangle(i * 10, j * 10, 10, 10));
-                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new DRectangle(i * 10, j * 10, 10, 10));
-                            if (aa.inPath[i, j])
-                                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new DRectangle(i * 10, j * 10, 10, 10));
+                            graphics.FillRectangle(new SolidBrush(DColor.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new DRectangle(i * 10, j * 10, 10, 10));
+                            graphics.FillRectangle(new SolidBrush(DColor.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new DRectangle(i * 10, j * 10, 10, 10));
+                            if (astar.inPath[i, j])
+                                graphics.FillRectangle(new SolidBrush(DColor.Red), new DRectangle(i * 10, j * 10, 10, 10));
                         }
                     }
+                }
 
-                //bBayes = new Bitmap(260, 300);
                 picBoxBayes.Image = bBayes;
 
-                Graphics myg = Graphics.FromImage(bMap);
+                // Check which cells are within the viewing cone.
                 if (viewConePoints != null)
                 {
                     for (int i = 0; i < maxX; i++)
                     {
                         for (int j = 0; j < maxY; j++)
                         {
-                            //preySensor[i, j] = false;
                             DPoint a = new DPoint(i * 10 + 1, j * 10 + 1); // Top left
                             DPoint b = new DPoint((i + 1) * 10 - 1, j * 10 + 1); // Top right
                             DPoint c = new DPoint(i * 10 + 1, (j + 1) * 10 - 1); // Bottom left
@@ -414,42 +413,31 @@ namespace PredatorPreyAssignment
                     }
                 }
 
-                //int away = (robot as Rovio.Predator).preyDistance * 
                 if (robot.GetType() == typeof(Rovio.PredatorMap))
                 {
-                    if ((robot as Rovio.BaseArena).IsPreySeen())
+                    if (robot.IsPreySeen())
                     {
                         //picBoxPrey.Show();
-                        picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y - (int)((robot as Rovio.PredatorMap).GetPreyDistance() * 26 * 3));
+                        picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y - (int)(robot.GetPreyDistance() * 26 * 3));
 
-                        double totalFOV = (robot as Rovio.PredatorMap).GetPreyDistance() * 100 * 0.93;
-                        double percentage = (double)(robot as Rovio.PredatorMap).preyRectangle.X / (double)robot.cameraDimensions.X * 100;
+                        double totalFOV = robot.GetPreyDistance() * 100 * 0.93;
+                        double percentage = (double)robot.preyRectangle.X / (double)robot.cameraDimensions.X * 100;
                         double newX = percentage * (totalFOV / 100);
 
-                        //int rovLocationX = ((int)totalFOV/2) + (int)newX;
-                        //int rovLocationY = 
-                        try
+                        DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX, picBoxPrey.Location.Y);
+                        using (matrix = new System.Drawing.Drawing2D.Matrix())
                         {
-                            //picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV/2) + (int)newX, picBoxPrey.Location.Y);
-                            DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX, picBoxPrey.Location.Y);
-                            System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
-
-                            m.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
-                            m.Translate(0f, -0f);
-                            System.Drawing.Point[] aPoints = { newPosition };
-                            m.TransformPoints(aPoints);
-
+                            matrix.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
+                            matrix.Translate(0f, -0f);
+                            DPoint[] aPoints = { newPosition };
+                            matrix.TransformPoints(aPoints);
                             picBoxPrey.Location = aPoints[0];
-
                         }
-                        catch { }
 
-
-                        try
-                        {
+                        try 
+                        { 
                             preySensor[(int)((picBoxPrey.Location.X / 10) + 1.5), (int)((picBoxPrey.Location.Y / 10) + 1.5)] = true;
-                        }
-                        catch { }
+                        } catch { }
                     }
                     else
                         picBoxPrey.Hide();
@@ -474,7 +462,7 @@ namespace PredatorPreyAssignment
 
                         picBoxObstacle.Location = new System.Drawing.Point(picBoxRovio.Location.X + (robot as Rovio.BaseArena).obstacleRectangle.X + (robot as Rovio.BaseArena).obstacleRectangle.Width, picBoxRovio.Location.Y - (int)((robot as Rovio.BaseArena).GetObstacleDistance() * 20 * 3));
 
-
+                        // Calculat the obstacle's position along the X.
                         double totalFOV = (robot as Rovio.BaseArena).GetObstacleDistance() * 100 * 0.93;
                         double percentage = (double)(robot as Rovio.BaseArena).obstacleRectangle.X / (double)robot.cameraDimensions.X * 100;
                         double newX = percentage * (totalFOV / 100);
@@ -482,21 +470,17 @@ namespace PredatorPreyAssignment
 
                         //int rovLocationX = ((int)totalFOV/2) + (int)newX;
                         //int rovLocationY = 
-                        try
-                        {
+
                             //picBoxPrey.Location = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV/2) + (int)newX, picBoxPrey.Location.Y);
-                            DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX*2, picBoxObstacle.Location.Y);
-                            System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
-
-                            m.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
-                            m.Translate((float)-newX+30f, -(float)(robot.GetObstacleDistance() * 40 * 3));
-                            System.Drawing.Point[] aPoints = { newPosition };
-                            m.TransformPoints(aPoints);
+                        DPoint newPosition = new System.Drawing.Point(picBoxRovio.Location.X - ((int)totalFOV / 2) + (int)newX*2, picBoxObstacle.Location.Y);
+                        using (matrix = new System.Drawing.Drawing2D.Matrix())
+                        {
+                            matrix.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
+                            matrix.Translate((float)-newX + 30f, -(float)(robot.GetObstacleDistance() * 40 * 3));
+                            DPoint[] aPoints = { newPosition };
+                            matrix.TransformPoints(aPoints);
                             picBoxObstacle.Location = aPoints[0];
-
                         }
-                        catch { }
-
 
                         try
                         {
@@ -514,68 +498,58 @@ namespace PredatorPreyAssignment
                         catch { }
                     }
                     else
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            for (int j = 0; j < 3; j++)
-                            {
-                                //preySensor[(int)((robot as Rovio.Predator).preyRectangle.X +i)/maxX , (int)((robot as Rovio.Predator).preyRectangle.Y+i)/maxY] = false;
-                            }
-                        }
-                         picBoxObstacle.Hide();
-                    }
+                        picBoxObstacle.Hide();
                 }
 
-                bool bb = true;
-                robot.MYTESTBOOL = false;
-                if (bb)
+
+                // Rotate the Rovio icon to the angle that the robot physically faces.
+                System.Drawing.Drawing2D.Matrix matrixRovio = new System.Drawing.Drawing2D.Matrix();
+                matrixRovio.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
+                matrixRovio.Translate(0f, -0f);
+                DPoint[] rovioMovementPoints = {new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height/2)), 
+                                                    new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) - 69, picBoxRovio.Location.Y-150),
+                                                    new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) + 69, picBoxRovio.Location.Y-150)};
+                matrixRovio.TransformPoints(rovioMovementPoints);
+
+                if ((robot as Rovio.BaseArena).IsObstacleSeen())
                 {
-                    System.Drawing.Point p = new System.Drawing.Point(picBoxRovio.Location.X, picBoxRovio.Location.Y);
-                    robot.MYTESTBOOL = false;
-                    System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
-
-                    m.RotateAt((float)robot.cumulativeAngle, new System.Drawing.Point(picBoxRovio.Location.X + (picBoxRovio.Size.Width / 2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height / 2)));
-                    m.Translate(0f, -0f);
-                    DPoint[] aPoints = {new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2), picBoxRovio.Location.Y + (picBoxRovio.Size.Height/2)), 
-                                                     new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) - 69, picBoxRovio.Location.Y-150),
-                                                     new DPoint(picBoxRovio.Location.X+(picBoxRovio.Size.Width/2) + 69, picBoxRovio.Location.Y-150)};
-
+                    // Get the left and right points of the obstacle in the viewing cone and orientate accordingly.
                     
-                    m.TransformPoints(aPoints);
-
-                    if ((robot as Rovio.BaseArena).IsObstacleSeen())
+                    DPoint leftPoint = new DPoint(picBoxObstacle.Location.X - (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
+                    DPoint rightPoint = leftPoint;
+                    using (matrix = new System.Drawing.Drawing2D.Matrix())
                     {
-                        DPoint leftPoint = new DPoint(picBoxObstacle.Location.X - (picBoxObstacle.Width / 2), picBoxObstacle.Location.Y - 15);
-                        DPoint rightPoint = leftPoint;
+                        matrix.RotateAt((float)robot.cumulativeAngle, leftPoint);
+                        matrix.Translate(0, -0f);
 
-                        System.Drawing.Drawing2D.Matrix mx = new System.Drawing.Drawing2D.Matrix();
-                        mx.RotateAt((float)robot.cumulativeAngle, leftPoint);
-                        mx.Translate(0, -0f);
-                        DPoint[] tempPointArr = {leftPoint};
-                        mx.TransformPoints(tempPointArr);
+                        DPoint[] tempPointArr = { leftPoint };
+                        matrix.TransformPoints(tempPointArr);
                         leftPoint = tempPointArr[0];
 
-
-                        mx = new System.Drawing.Drawing2D.Matrix();
-                        mx.RotateAt((float)robot.cumulativeAngle, leftPoint);
-                        mx.Translate(30, 0);
-                        tempPointArr[0] = leftPoint;
-                        mx.TransformPoints(tempPointArr);
+                        // Transform the right point relative to the position of the left.
+                        matrix = new System.Drawing.Drawing2D.Matrix();
+                        matrix.RotateAt((float)robot.cumulativeAngle, leftPoint);
+                        matrix.Translate(30, 0);
+                        tempPointArr[0] = new DPoint(0, 0);
+                        matrix.TransformPoints(tempPointArr);
                         rightPoint = tempPointArr[0];
-                        if (PointInPolygon(leftPoint, aPoints) && PointInPolygon(rightPoint, aPoints))
-                        {
-                            aPoints = new DPoint[] { aPoints[0], aPoints[1], leftPoint, rightPoint, aPoints[2] };
-                        }
                     }
-                    viewConePoints = aPoints;
-                    Bitmap rotated = new Bitmap(bRovio.Width + 70, bRovio.Height + 70);
-                    rotated.SetResolution(bRovio.HorizontalResolution, bRovio.VerticalResolution);
+                    // Check if all points are still within the viewing cone. If not, skip over them.
+                    if (PointInPolygon(leftPoint, rovioMovementPoints) && PointInPolygon(rightPoint, rovioMovementPoints))
+                        rovioMovementPoints = new DPoint[] { rovioMovementPoints[0], rovioMovementPoints[1], leftPoint, rightPoint, rovioMovementPoints[2] };
+                }
 
-                    Graphics gr = Graphics.FromImage(rotated);
-                    gr.TranslateTransform(bRovio.Width / 2, bRovio.Height / 2);
-                    gr.RotateTransform((float)robot.cumulativeAngle);
-                    gr.TranslateTransform(-bRovio.Width / 2, -bRovio.Height / 2);
-                    gr.DrawImage(bRovio, new DPoint(0, 0));
+
+                viewConePoints = rovioMovementPoints;
+                Bitmap rotated = new Bitmap(bRovio.Width + 70, bRovio.Height + 70);
+                rotated.SetResolution(bRovio.HorizontalResolution, bRovio.VerticalResolution);
+
+                using (graphics = Graphics.FromImage(rotated))
+                {
+                    graphics.TranslateTransform(bRovio.Width / 2, bRovio.Height / 2);
+                    graphics.RotateTransform((float)robot.cumulativeAngle);
+                    graphics.TranslateTransform(-bRovio.Width / 2, -bRovio.Height / 2);
+                    graphics.DrawImage(bRovio, new DPoint(0, 0));
 
                     picBoxRovio.Size = new Size(27, 24);
                     picBoxRovio.Image = rotated;
@@ -586,15 +560,16 @@ namespace PredatorPreyAssignment
 
                     picBoxCone.Location = new DPoint(0, 0);
                     picBoxCone.Size = new Size(260, 300);
-
-                    Bitmap newCone = new Bitmap(260, 300);
-                    gr = Graphics.FromImage(newCone);
-                    gr.FillPolygon(new SolidBrush(DColor.FromArgb(100, DColor.ForestGreen)), viewConePoints);
-
-                    picBoxCone.Image = newCone;
-
-                    //picBoxRovio.Location = new System.Drawing.Point(aPoints[0].X, aPoints[0].Y);
                 }
+
+                Bitmap newCone = new Bitmap(260, 300);
+                using (graphics = Graphics.FromImage(newCone))
+                {
+                    graphics.FillPolygon(new SolidBrush(DColor.FromArgb(100, DColor.ForestGreen)), viewConePoints);
+                    picBoxCone.Image = newCone;
+                }
+                //picBoxRovio.Location = new System.Drawing.Point(aPoints[0].X, aPoints[0].Y);
+                
 
             }
              

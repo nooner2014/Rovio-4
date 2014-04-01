@@ -142,7 +142,7 @@ namespace Rovio
         public bool AutoUpdate = true;
 
         /// <summary>
-        /// The Update function that manually refreshes the state of a given component (e.g. when AutoUpdate = false)
+        /// The Update function that manually refreshes the state of a given component (e.graphics. when AutoUpdate = false)
         /// </summary>
         public virtual void Update() { }
     }
@@ -315,7 +315,7 @@ namespace Rovio
             /// If the NorthStar signal is lost the playback is interrupted.
             public void PlayPathForward() { Request("7"); }
 
-            /// \brief Replay the specified path from the closest point to the first one.
+            /// \brief Replay the specified path from the closest point to the newP one.
             /// 
             /// If the NorthStar signal is lost the playback is interrupted.
             public void PlayPathBackward() { Request("8"); }
@@ -427,7 +427,7 @@ namespace Rovio
 
             /// Report class.
             /// \todo 'ui_status' is not documented,
-            /// \todo Use the defined enums for popular commands (e.g. Resolution)
+            /// \todo Use the defined enums for popular commands (e.graphics. Resolution)
             public class ReportComponent : MovementComponent
             {
                 /// <summary>
@@ -1226,7 +1226,7 @@ namespace Rovio
             /// <summary>
             /// Set server time zone and time.
             /// Sec1970 - seconds since "00:00:00 1/1/1970".
-            /// TimeZone – Time zone in minutes. (e.g. Beijing is GMT+08:00, TimeZone = -480)
+            /// TimeZone – Time zone in minutes. (e.graphics. Beijing is GMT+08:00, TimeZone = -480)
             /// 
             /// \todo Implement with DateTime input parameter.
             /// </summary>

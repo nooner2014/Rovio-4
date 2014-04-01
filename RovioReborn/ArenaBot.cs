@@ -503,7 +503,7 @@ namespace Rovio
             }
 
 
-            // Remove the first eighty-five pixels of the camera image - only for wall processing since the top is unneeded.
+            // Remove the newP eighty-five pixels of the camera image - only for wall processing since the top is unneeded.
             Bitmap wallImage = new Bitmap(outputImage);
             Graphics g = Graphics.FromImage(wallImage);
             g.FillRectangle(new SolidBrush(System.Drawing.Color.Black), new System.Drawing.Rectangle(0, 0, 352, 85));

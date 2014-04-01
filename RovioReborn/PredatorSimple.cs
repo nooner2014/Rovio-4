@@ -28,7 +28,7 @@ namespace Rovio
         public PredatorSimple(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
         {
-           // map = m;
+           // map = matrix;
             
         }
 

@@ -28,20 +28,20 @@ namespace Rovio
         protected System.Drawing.Rectangle preyScreenPosition = System.Drawing.Rectangle.Empty;
         public System.Drawing.Rectangle obstacleRectangle = System.Drawing.Rectangle.Empty;
         public System.Drawing.Rectangle preyRectangle = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle blueLineRectangle = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle secondBlueLineRectangle = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle yellowWallRectangleTop = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle yellowWallRectangleBottom = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle whiteWallRectangleTop = System.Drawing.Rectangle.Empty;
-        System.Drawing.Rectangle whiteWallRectangleBottom = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle blueLineRectangle = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle secondBlueLineRectangle = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle yellowWallRectangleTop = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle yellowWallRectangleBottom = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle whiteWallRectangleTop = System.Drawing.Rectangle.Empty;
+        protected System.Drawing.Rectangle whiteWallRectangleBottom = System.Drawing.Rectangle.Empty;
 
 
         // Segmented bitmaps.
-        Bitmap redColourBitmap;
-        Bitmap greenColourBitmap;
-        Bitmap blueColourBitmap;
-        Bitmap yellowColourBitmap;
-        Bitmap whiteColourBitmap;
+        protected Bitmap redColourBitmap;
+        protected Bitmap greenColourBitmap;
+        protected Bitmap blueColourBitmap;
+        protected Bitmap yellowColourBitmap;
+        protected Bitmap whiteColourBitmap;
 
         
 
@@ -57,14 +57,12 @@ namespace Rovio
 
 
         // Movement affecting variables.
-       
         protected int wallLineHeight = 0;
         protected int searchingRotationCount = 8;
-        List<float> wallHeightList = new List<float>();
-        List<char> wallDirectionList = new List<char>();
-        Bitmap outputImage;
-
-
+        protected Bitmap outputImage;
+        protected List<float> wallHeightList = new List<float>();
+        protected List<char> wallDirectionList = new List<char>();
+        
         // Variables for map.
         private bool preySeen = false;
         public bool IsPreySeen() { return preySeen; }
@@ -79,9 +77,12 @@ namespace Rovio
         public double westDist = double.PositiveInfinity;
         public double southDist = double.PositiveInfinity;
         public double eastDist = double.PositiveInfinity;
-        public char lastReadDirection;
+        protected char lastReadDirection;
 
         public double wallDist = double.PositiveInfinity;
+
+
+        protected int outputImageKey = 0;
 
 
         public event ImageReady SourceImage;
@@ -89,28 +90,19 @@ namespace Rovio
         //////////////////Initialisation////////////////////
         ////////////////////////////////////////////////////
         
-
         public BaseArena(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
-        {
-           // map = m;
-            
-        }
-        public int output = 0;
-
-
-        public override void KeyboardInput()
+        { }
+        
+        // Override base class' keyboard input method.
+        protected override void KeyboardInput()
         {
             try
             {
-                output = keys[0] - 48;
+                outputImageKey = keys[0] - 48;
             }
             catch { }
         }
-
-        
-
-        
 
         public void SetFilters(object values)
         {
@@ -188,6 +180,7 @@ namespace Rovio
  
         }
 
+        /* Old method for getting direction
         public void GetNewCorrectDirection()
         {
             while (running)
@@ -314,10 +307,12 @@ namespace Rovio
                 if (degAngle < 0)
                     degAngle += 360;
                 Console.WriteLine(degAngle);
-                //cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
+                cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
             }
         }
+        */
 
+        /* Old method for getting angle
         public void MyNewTest()
         {
             while (running)
@@ -380,7 +375,10 @@ namespace Rovio
                 Console.WriteLine(MathHelper.ToDegrees(radAngle));
             }
         }
+        */
 
+
+        /* Old method for calculating direction
         // Once ten direction readings are calculated, find the mode (eliminates error).
         private void CalculateDirection()
         {
@@ -420,12 +418,8 @@ namespace Rovio
                 wallDirectionList = new List<char>();
             }
         }
-
+        */
         
-
-        // Set image processing filters based on dictionary values (extracted from form).
-
-
         ////////////////////////////////////////////////////
         ///////////////////State machine////////////////////
         ////////////////////////////////////////////////////
@@ -433,6 +427,7 @@ namespace Rovio
         // All movement commands are made via this function (comment out in the main Predator function to stop Rovio moving).
         
 
+        /* Old initial localisation
         // First movements - rotate 90 degrees four times to localise.
         protected void InitialMovements()
         {
@@ -443,37 +438,28 @@ namespace Rovio
 
             map.SetInitialPoint();
         }
-
-        // Called when prey has just left the screen.
-
-
-        // Called when prey hasn't been seen for a few seconds.
-        
-
-        // Only called when prey is in view.
-        
-        
+        */      
 
         ////////////////////////////////////////////////////
-        ////////Image processing and output to screen///////
+        /////Image processing and outputImage to screen/////
         ////////////////////////////////////////////////////
 
         protected void SearchImage()
         {
             while (running)
             {
-                
-                    outputImage = cameraImage;
+                outputImage = cameraImage;
 
                 // Only processes if the image is new.
                 if (outputImage != lastProcessedImage)
                 {
-
                     lastProcessedImage = outputImage;
                     FindRectangles();
                     MergeImages();
                     DrawRectanlges();
                     FindDirection();
+
+
                     /*if (rectResult.Length > 1 && rectResult[1].Height > 5)
                         whiteWallRectangleBottom = rectResult[1];
                     else
@@ -493,11 +479,9 @@ namespace Rovio
                     preyDistance = (float)25 / (float)preyRectangle.Height;
                     obstacleDistance = (float)130 / (float)obstacleRectangle.Height;
 
-
-
                     if (outputImage != null)
                     {
-                        switch (output)
+                        switch (outputImageKey)
                         {
                             case 1: outputImage = redColourBitmap;
                                 break;
@@ -509,20 +493,20 @@ namespace Rovio
                                 break;
                             case 5: outputImage = whiteColourBitmap;
                                 break;
-                            
                         }
                     }
-                        SourceImage(outputImage);
+                    SourceImage(outputImage);
                 }
             }
         }
 
         protected void FindRectangles()
         {
-
             System.Drawing.Rectangle[] rectResult;
+
+
             // Pass filter and detected object from camera image. Referenced bitmap is set as binary image.
-            // After image has been analysed, read through the output array and sort.
+            // After image has been analysed, read through the outputImageKey array and sort.
 
             // Green block
             rectResult = DetectObstacle(greenFilter, outputImage, new System.Drawing.Point(35, 35), ref greenColourBitmap);

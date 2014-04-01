@@ -86,11 +86,6 @@
             this.labelDocked.Text = "dockedStatus";
             this.labelDocked.Visible = false;
             // 
-            // updateTimer
-            // 
-            this.updateTimer.Interval = 500;
-            this.updateTimer.Tick += new System.EventHandler(this.updateTimer_Tick);
-            // 
             // label6
             // 
             this.label6.AutoSize = true;
@@ -237,7 +232,6 @@
             this.Load += new System.EventHandler(this.ImageViewer_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ImageViewer_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageViewer_KeyUp);
-            this.Resize += new System.EventHandler(this.ImageViewer_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.picboxCameraImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxUserLabels)).EndInit();
             this.ResumeLayout(false);

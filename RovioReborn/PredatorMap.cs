@@ -26,9 +26,9 @@ namespace Rovio
             // System.Threading.Thread source = new System.Threading.Thread(ImageGet);
             //source.Start();
 
-            //System.Threading.Thread move = new System.Threading.Thread(SetFSMAction);
+            //System.Threading.Thread threadMove = new System.Threading.Thread(SetFSMAction);
             System.Threading.Thread move = new System.Threading.Thread(InitialMovements);
-            //move.Start();
+            //threadMove.Start();
 
 
 

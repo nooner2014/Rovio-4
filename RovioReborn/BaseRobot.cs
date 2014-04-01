@@ -22,7 +22,7 @@ namespace Rovio
         protected bool running = true;
         protected Object commandLock = new Object();
 
-        private System.Threading.Thread cameraImageThread;
+        protected System.Threading.Thread threadCameraImage;
         public string direction = "Unknown";
         protected Map map;
         public double cumulativeAngle = 0;
@@ -61,7 +61,6 @@ namespace Rovio
                 lock (commandLock)
                 {
                     cameraImage = Camera.Image;
-                    irSensor = IRSensor.Detection;
                 }
             }
         }
@@ -86,6 +85,8 @@ namespace Rovio
                 .Select(g => new { Value = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count).First().Value;
         }
+
+        protected System.Threading.Thread threadKeyboardInput;
 
         public void Init()
         {
@@ -117,10 +118,10 @@ namespace Rovio
                     cameraDimensions = new System.Drawing.Point(640, 480);
             }
             
-            System.Threading.Thread keyboard = new System.Threading.Thread(KeyboardStart);
-            keyboard.Start();
-            cameraImageThread = new System.Threading.Thread(ImageGet);
-            cameraImageThread.Start();
+            threadKeyboardInput = new System.Threading.Thread(KeyboardStart);
+            threadKeyboardInput.Start();
+            threadCameraImage = new System.Threading.Thread(ImageGet);
+            threadCameraImage.Start();
         }
 
         //public delegate void ImageReady(Image image);
@@ -131,14 +132,6 @@ namespace Rovio
         public void KillThreads()
         {
             running = false;
-            /*
-            lock (commandLock)
-            {
-                actions.Abort();
-                search.Abort();
-                source.Abort();
-                move.Abort();
-            }*/
         }
 
         ////////////////////////////////////////////////////

@@ -19,27 +19,152 @@ namespace PredatorPreyAssignment
         }
 
         private System.Threading.Thread robot_thread;
-        enum RobotModes
-        { 
-            Predator,
-            Prey,
-            User,
+
+        private String robotURL = "http://10.82.0.41/";
+        private static Rovio.BaseRobot robot;
+        private static Map map;
+
+        private Dictionary<string, float> valueDict = new Dictionary<string, float>();
+        private EventHandler upDownHandler;
+        private EventHandler robotButtonEventHandler;
+        private List<int> currentKeys = new List<int>();
+        private List<Label> filterLabels = new List<Label>();
+        private List<Label> userLabels = new List<Label>();
+        private List<NumericUpDown> filterUpDowns = new List<NumericUpDown>();
+        private List<NumericUpDown> imageSegmentingAdjusters = new List<NumericUpDown>();
+
+        // Form initialisation.
+        private void ImageViewer_Load(object sender, EventArgs e)
+        {
+            textBoxIP.Text = robotURL;
+            picboxCameraImage.Size = new Size(352, 288);
+            Bitmap b = new Bitmap(352, 288);
+            Graphics g = Graphics.FromImage(b);
+            g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0, 0, 352, 288));
+            g.DrawString("Not connected", new Font(FontFamily.GenericSansSerif, 12), new SolidBrush(Color.Black), new Point(120, 135));
+            picboxCameraImage.Image = b;
+            upDownHandler += new EventHandler(UpDownHandler);
+            FilterChangersSetup(filterUpDowns, "green");
+            FilterChangersSetup(filterUpDowns, "red");
+            FilterChangersSetup(filterUpDowns, "blue");
+            FilterChangersSetup(filterUpDowns, "yellow");
+            FilterChangersSetup(filterUpDowns, "white");
+
+
+            SetUserControlLabels();
+
+            robotButtonEventHandler = RobotButtonHandler;
+
+            buttonPredator.Click += robotButtonEventHandler;
+            buttonPredatorFSM.Click += robotButtonEventHandler;
+            buttonUser.Click += robotButtonEventHandler;
+            buttonStop.Click += robotButtonEventHandler;
+
+            Show();
+            Text = "BLA11210972 Computer Vision & Robotics Predator/Prey";
+            Label l = new Label();
+
+            //Show();
+            //imageSegmentingAdjustersTest[0].ValueChanged += handler;
+            // Start predator thread.
+            Focus();
+
+
+
         }
 
-        String robotURL = "http://10.82.0.41/";
-        static Rovio.BaseRobot robot;
-        RobotModes robotState = RobotModes.Predator;
+        // Set robot based on the string from the form button pressed.
+        private void InitialiseRobot(string type)
+        {
 
-        List<int> currentKeys = new List<int>();
-        List<Label> filterLabels = new List<Label>();
-        Dictionary<string, float> valueDict = new Dictionary<string, float>();
-        List<NumericUpDown> imageSegmentingAdjusters = new List<NumericUpDown>();
-        EventHandler upDownHandler;
+            //System.Threading.Thread.Sleep(2000);
+            buttonPredator.Enabled = true;
+            buttonUser.Enabled = true;
+            buttonPredatorFSM.Enabled = true;
+            picBoxUserLabels.Visible = false;
+            SetFilterChangerVisibility(false);
 
-        List<NumericUpDown> filterUpDowns = new List<NumericUpDown>();
+            if (robot != null)
+            {
+                robot.KillThreads();
+                while (robot_thread.ThreadState != System.Threading.ThreadState.Stopped && robot_thread.ThreadState != System.Threading.ThreadState.WaitSleepJoin)
+                    System.Threading.Thread.Sleep(1);
+
+                if (map != null)
+                {
+                    map.Hide();
+                    map = null;
+                }
+            }
+
+
+            if (type == "Predator")
+            {
+                buttonPredator.Enabled = false;
+                map = new Map((robot as Rovio.BaseArena), Controls, 387, 18);
+                map.UpdatePicBox += UpdatePictureBox;
+                robot = new Rovio.PredatorMap(robotURL, "user", "password", map, currentKeys);
+                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
+
+
+                map.SetUpdate((robot as Rovio.BaseArena));
+
+                updateTimer.Start();
+
+                if (valueDict.Count == 0)
+                    ReadDictValues();
+
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
+                robot_thread = new System.Threading.Thread(robot.Start);
+                robot_thread.Start();
+            }
+            else if (type == "PredatorFSM")
+            {
+                if (map != null)
+                    map.Hide();
+                robot = new Rovio.PredatorSimple(robotURL, "user", "password", map, currentKeys);
+                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
+
+                updateTimer.Start();
+
+                if (valueDict.Count == 0)
+                    ReadDictValues();
+                (robot as Rovio.BaseArena).SetFilters(valueDict);
+                SetFilterChangerVisibility(true);
+                robot_thread = new System.Threading.Thread(robot.Start);
+                robot_thread.Start();
+            }
+            else if (type == "User")
+            {
+                if (map != null)
+                    map.Hide();
+                robot = new Rovio.UserRobot(robotURL, "user", "password", map, currentKeys);
+                (robot as Rovio.UserRobot).SourceImage += UpdateImage;
+                picBoxUserLabels.Visible = true;
+                robot_thread = new System.Threading.Thread(robot.Start);
+                robot_thread.Start();
+            }
+
+            if (type == "Predator" || type == "PredatorFSM" || type == "User")
+            {
+                picboxCameraImage.Location = new Point(20, 22);
+                picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
+                textBoxIP.Enabled = false;
+                buttonPredator.Enabled = false;
+                buttonUser.Enabled = false;
+                buttonPredatorFSM.Enabled = false;
+                buttonStop.Enabled = true;
+                Focus();
+            }
+            else
+            {
+                textBoxIP.Enabled = true;
+                buttonStop.Enabled = false;
+                robot.KillThreads();
+            }
+        }
+
         // Set default filter values in dictionary.
-
-
         private void ReadDictValues()
         {
             string line = "";
@@ -72,6 +197,7 @@ namespace PredatorPreyAssignment
             }
         }
 
+        // Set filter changers in form.
         private void FilterChangersSetup(List<NumericUpDown> list, string col)
         {
             Point imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 30 + (120 * (list.Count / 12)/3), 85);
@@ -140,53 +266,13 @@ namespace PredatorPreyAssignment
                 filterLabels[i].Visible = false;
         }
 
-        static Map map;
-        private void ImageViewer_Load(object sender, EventArgs e)
-        {
-            textBoxIP.Text = robotURL;
-            picboxCameraImage.Size = new Size(352, 288);
-            Bitmap b = new Bitmap(352, 288);
-            Graphics g = Graphics.FromImage(b);
-            g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0, 0, 352, 288));
-            g.DrawString("Not connected", new Font(FontFamily.GenericSansSerif, 12), new SolidBrush(Color.Black), new Point(120, 135));
-            picboxCameraImage.Image = b;
-            upDownHandler += new EventHandler(UpDownHandler);
-            FilterChangersSetup(filterUpDowns, "green");
-            FilterChangersSetup(filterUpDowns, "red");
-            FilterChangersSetup(filterUpDowns, "blue");
-            FilterChangersSetup(filterUpDowns, "yellow");
-            FilterChangersSetup(filterUpDowns, "white");
-
-
-            SetUserControlLabels();
-
-            robotButtonEventHandler = RobotButtonHandler;
-
-            buttonPredator.Click += robotButtonEventHandler;
-            buttonPredatorFSM.Click += robotButtonEventHandler;
-            buttonUser.Click += robotButtonEventHandler;
-            buttonStop.Click += robotButtonEventHandler;
-
-            Show();
-            Text = "BLA11210972 Computer Vision & Robotics Predator/Prey";
-            Label l = new Label();
-
-            //Show();
-            //imageSegmentingAdjustersTest[0].ValueChanged += handler;
-            // Start predator thread.
-            Focus();
-
-            
-            
-        }
-
-        EventHandler robotButtonEventHandler;// = RobotButtonHandler;
-
+        // Handler for the buttons to switch robot types.
         private void RobotButtonHandler(object sender, EventArgs e)
         { 
             InitialiseRobot((sender as Button).Text);
         }
 
+        // Choose whether the filter changers appear on the form.
         private void SetFilterChangerVisibility(bool input)
         {
             for (int i = 0; i < filterUpDowns.Count; i++)
@@ -201,7 +287,7 @@ namespace PredatorPreyAssignment
                 filterLabels[i].Visible = input;
         }
 
-        List<Label> userLabels = new List<Label>();
+        // Set the labels to appear when user controls are enabled.
         private void SetUserControlLabels()
         {
             Bitmap b = new Bitmap(300, 300);
@@ -229,100 +315,13 @@ namespace PredatorPreyAssignment
             picBoxUserLabels.Visible = false;
         }
 
-        // "User" "Predator" "FSM"
-        private void InitialiseRobot(string type)
-        {
-
-            //System.Threading.Thread.Sleep(2000);
-            buttonPredator.Enabled = true;
-            buttonUser.Enabled = true;
-            buttonPredatorFSM.Enabled = true;
-            picBoxUserLabels.Visible = false;
-            SetFilterChangerVisibility(false);
-
-            if (robot != null)
-                robot.KillThreads();
-  
-
-            if (type == "Predator")
-            {
-                buttonPredator.Enabled = false;
-                map = new Map((robot as Rovio.BaseArena), Controls, 387, 18);
-                map.UpdatePicBox += UpdatePictureBox;
-                robot = new Rovio.PredatorMap(robotURL, "user", "password", map, currentKeys);
-                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
-
-
-                map.SetUpdate((robot as Rovio.BaseArena));
-                
-                updateTimer.Start();
-
-                if (valueDict.Count == 0)
-                    ReadDictValues();
-
-                (robot as Rovio.BaseArena).SetFilters(valueDict);
-                robot_thread = new System.Threading.Thread(robot.Start);
-                robot_thread.Start();
-            }
-            else if (type == "PredatorFSM")
-            {
-                if (map != null)
-                    map.Hide();
-                robot = new Rovio.PredatorSimple(robotURL, "user", "password", map, currentKeys);
-                (robot as Rovio.BaseArena).SourceImage += UpdateImage;
-
-                updateTimer.Start();
-
-                if (valueDict.Count == 0)
-                    ReadDictValues();
-                (robot as Rovio.BaseArena).SetFilters(valueDict);
-                SetFilterChangerVisibility(true);
-                robot_thread = new System.Threading.Thread(robot.Start);
-                robot_thread.Start();
-            }
-            else if (type == "User")
-            {
-                if (map != null)
-                    map.Hide();
-                robot = new Rovio.UserRobot(robotURL, "user", "password", map, currentKeys);
-                (robot as Rovio.UserRobot).SourceImage += UpdateImage;
-                picBoxUserLabels.Visible = true;
-                robot_thread = new System.Threading.Thread(robot.Start);
-                robot_thread.Start();
-            }
-
-            if (type == "Predator" || type == "PredatorFSM" || type == "User")
-            {
-                picboxCameraImage.Location = new Point(20, 22);
-                picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
-                textBoxIP.Enabled = false;
-                buttonPredator.Enabled = false;
-                buttonUser.Enabled = false;
-                buttonPredatorFSM.Enabled = false;
-                buttonStop.Enabled = true;
-                Focus();
-            }
-            else
-            {
-                textBoxIP.Enabled = true;
-                buttonStop.Enabled = false;
-                robot.KillThreads();
-            }
-        }
-
-
-        private void ImageViewer_Resize(object sender, EventArgs e)
-        {
-            picboxCameraImage.Size = this.ClientSize;
-        }
-
+        // Receive a picture box image from the classes.
         public void UpdatePictureBox(PictureBox pB, System.Drawing.Point point)
         {
             if (InvokeRequired)
                 Invoke(new MethodInvoker(delegate { UpdatePictureBox(pB, point); }));
             else
-                pB.Location = point;
-                
+                pB.Location = point;   
         }
 
         // Update form picture box
@@ -346,19 +345,17 @@ namespace PredatorPreyAssignment
         // Abort thread and close window.
         private void ImageViewer_FormClosed(object sender, FormClosedEventArgs e)
         {
-            try
+            if (robot != null)
             {
-                robot_thread.Abort();
+                robot.KillThreads();
+                while (robot_thread.ThreadState != System.Threading.ThreadState.Stopped && robot_thread.ThreadState != System.Threading.ThreadState.WaitSleepJoin)
+                    System.Threading.Thread.Sleep(1);
             }
-            catch { }
-
             Application.Exit();
             Environment.Exit(0);
         }
 
-        // Handle switch to user input state.
-
-        // Key down - adds key to dictionary (if it is not already there).
+        // Key down - adds key to dictionary if it is not already there.
         private void ImageViewer_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
@@ -373,6 +370,7 @@ namespace PredatorPreyAssignment
             currentKeys.Remove(Convert.ToInt32(e.KeyCode));
         }
 
+        // Handles changing values for the filter numerical up downs.
         private void UpDownHandler(object sender, EventArgs e)
         { 
             if (valueDict.ContainsKey((sender as NumericUpDown).Name.ToString()))
@@ -382,29 +380,7 @@ namespace PredatorPreyAssignment
             }
         }
 
-        private void updateTimer_Tick(object sender, EventArgs e)
-        {
-            labelDirection.Text = robot.direction;
-
-            //if (robot.direction == "North")
-            //    pictureBoxRovio.Image.RotateFlip(RotateFlipType.RotateNoneFlipNone);
-            //else if (robot.direction == "South")
-            //    pictureBoxRovio.Image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            //else if (robot.direction == "East")
-            //    pictureBoxRovio.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-           // else if (robot.direction == "West")
-            //    pictureBoxRovio.Image.RotateFlip(RotateFlipType.Rotate270FlipNone);
-            try
-            {
-                //int dockedStatus = robot.API.Movement.Report.Charging;
-                labelDocked.Text = robot.chargingStatus == 80 ? "Docked" : "Not docked";
-                labelDirection.Text = (robot as Rovio.BaseArena).lastReadDirection.ToString();
-               // int batteryCharge = robot.API.Movement.Report.BatteryLevel;
-                labelBattery.Text = robot.batteryStatus.ToString();
-            }
-            catch { }
-        }
-
+        // Receives new string value when the IP text box is changed.
         private void textBoxIP_TextChanged(object sender, EventArgs e)
         {
             robotURL = textBoxIP.Text;

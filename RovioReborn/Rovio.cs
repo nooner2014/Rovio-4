@@ -73,7 +73,15 @@ namespace Rovio
         /// <returns>Response string.</returns>
         public string Request(string request)
         {
-            return web_client.DownloadString(web_client.BaseAddress + request);
+            try
+            {
+                return web_client.DownloadString(web_client.BaseAddress + request);
+            }
+            catch
+            {
+                System.Windows.Forms.MessageBox.Show("Robot timed out.");
+                return web_client.DownloadString(web_client.BaseAddress + request);
+            }
         }
 
         /// <summary>
@@ -84,7 +92,15 @@ namespace Rovio
         /// <returns>Response stream.</returns>
         public Stream StreamRequest(string request)
         {
+            try
+            {
                 return web_client.OpenRead(web_client.BaseAddress + request);
+            }
+            catch
+            {
+                System.Windows.Forms.MessageBox.Show("Robot timed out.");
+                return Stream.Null;
+            }
         }
 
         /// <summary>
@@ -1122,7 +1138,14 @@ namespace Rovio
             /// <returns>Bitmap image</returns>
             public Bitmap GetImage()
             {
-                return new Bitmap(robot.StreamRequest("Jpeg/CamImg0000.jpg"));
+                try
+                {
+                    return new Bitmap(robot.StreamRequest("Jpeg/CamImg0000.jpg"));
+                }
+                catch
+                {
+                    return new Bitmap(352, 288);
+                }
             }
         }
 
@@ -2133,7 +2156,7 @@ namespace Rovio
         }
 
         /// <summary>
-        /// Sensor output: false - no obstacle, true - obstacle in front.
+        /// Sensor outputImageKey: false - no obstacle, true - obstacle in front.
         /// </summary>
         public bool Detection
         {

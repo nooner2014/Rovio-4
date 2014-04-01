@@ -30,18 +30,23 @@ namespace Rovio
             
         }
 
+        System.Threading.Thread threadSearch;
+        System.Threading.Thread threadMove;
         public override void Start()
         {
-            System.Threading.Thread search = new System.Threading.Thread(SearchImage);
-            search.Start();
+            threadSearch = new System.Threading.Thread(SearchImage);
+            threadSearch.Start();
 
-            System.Threading.Thread move = new System.Threading.Thread(SetFSMAction);
-            //move.Start();
+            threadMove = new System.Threading.Thread(SetFSMAction);
+            threadMove.Start();
 
             while (running && connected)
             {
                // System.Threading.Thread.Sleep(1000);
             }
+
+            threadSearch.Join();
+            threadMove.Join();
         }
 
 
@@ -63,7 +68,7 @@ namespace Rovio
                    preyScreenPosition = preyRectangle;
                    trackingState = PredatorState.OnScreen;
                }
-               // If prey is out of view but has been recently seen, search with rotation.
+               // If prey is out of view but has been recently seen, threadSearch with rotation.
                if (preyRectangle == new System.Drawing.Rectangle(0, 0, 0, 0) && searchingRotationCount < 8)
                    trackingState = PredatorState.SearchingForPrey;
 
@@ -146,7 +151,7 @@ namespace Rovio
                     if (preyRectangle != new System.Drawing.Rectangle(0, 0, 0, 0))
                         preyScreenPosition = preyRectangle;
 
-                    // If prey is out of view but has been recently seen, search with rotation.
+                    // If prey is out of view but has been recently seen, threadSearch with rotation.
                     if (preyRectangle == new System.Drawing.Rectangle(0, 0, 0, 0) && searchingRotationCount < 8)
                         trackingState = Tracking.SearchForGreen;
                     // If prey has been out of view and hasn't been found with rotation, start roaming.
@@ -230,7 +235,7 @@ namespace Rovio
         protected void Approach()
         {
 
-            // If prey is not centred, rotate to it. Otherwise move forward until it's within a certain distance.
+            // If prey is not centred, rotate to it. Otherwise threadMove forward until it's within a certain distance.
 
             searchingRotationCount = 0;
             if (preyScreenPosition.X < 0 + cameraDimensions.X / 5)

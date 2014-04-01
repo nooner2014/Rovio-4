@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 
 
 using DColor = System.Drawing.Color;
+using DRectangle = System.Drawing.Rectangle;
 using DPoint = System.Drawing.Point;
 namespace PredatorPreyAssignment
 {
@@ -125,38 +126,43 @@ namespace PredatorPreyAssignment
         // Draws the grid to screen (only called once, at load).
         private void DrawGraphics()
         {
-            Graphics g = Graphics.FromImage(bMap);
-            
-            g.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), new System.Drawing.Rectangle(0, 0, bMap.Width, bMap.Height));
+  
+            using (Graphics g = Graphics.FromImage(bMap))
+                g.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), new DRectangle(0, 0, bMap.Width, bMap.Height));
 
-            g = Graphics.FromImage(bPrey);
-            g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new System.Drawing.Rectangle(0, 0, 3, 3));
+            using (Graphics g = Graphics.FromImage(bPrey))
+                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new DRectangle(0, 0, 3, 3));
 
-            g = Graphics.FromImage(bRovio);
-            g.FillEllipse(new SolidBrush(System.Drawing.Color.RosyBrown), new System.Drawing.Rectangle(0, 0, 24, 27));
-            g.FillRectangle(new SolidBrush(System.Drawing.Color.IndianRed), new System.Drawing.Rectangle(12, 0, 2, 13));
-
-            g = Graphics.FromImage(bObstacle);
-            g.FillRectangle(new SolidBrush(System.Drawing.Color.Green), new System.Drawing.Rectangle(0, 0, 30, 30));
-
-
-            g = Graphics.FromImage(bMap);
-            for (int i = 1; i < maxY; i++)
-                g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(0, i * 10), new System.Drawing.Point(260, i * 10));
-
-            for (int i = 1; i < maxX; i++)
-                g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(i * 10, 0), new System.Drawing.Point(i * 10, 300));
-
-            SolidBrush brush = new SolidBrush(System.Drawing.Color.DarkBlue);
-            g.FillRectangle(brush, new System.Drawing.Rectangle(0, 0, 30, 100));
-            g.FillRectangle(brush, new System.Drawing.Rectangle(bMap.Width - 30, 0, 30, 100));
-            g.FillRectangle(brush, new System.Drawing.Rectangle(0, bMap.Height - 100, 30, 100));
-            g.FillRectangle(brush, new System.Drawing.Rectangle(bMap.Width - 30, bMap.Height - 100, 30, 100));
+            using (Graphics g = Graphics.FromImage(bRovio))
+            {
+                g.FillEllipse(new SolidBrush(System.Drawing.Color.RosyBrown), new DRectangle(0, 0, 24, 27));
+                g.FillRectangle(new SolidBrush(System.Drawing.Color.IndianRed), new DRectangle(12, 0, 2, 13));
+            }
 
 
-            g = Graphics.FromImage(bCone);
-            DPoint[] conePoints = { new System.Drawing.Point(bCone.Width / 2, bCone.Height), new System.Drawing.Point(0, 0), new System.Drawing.Point(bCone.Width, 0) };
-            g.FillPolygon(new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(100, DColor.ForestGreen)), conePoints);
+            using (Graphics g = Graphics.FromImage(bObstacle))
+                g.FillRectangle(new SolidBrush(System.Drawing.Color.Green), new DRectangle(0, 0, 30, 30));
+
+            using (Graphics g = Graphics.FromImage(bMap))
+            {
+                for (int i = 1; i < maxY; i++)
+                    g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(0, i * 10), new System.Drawing.Point(260, i * 10));
+
+                for (int i = 1; i < maxX; i++)
+                    g.DrawLine(new Pen(System.Drawing.Color.DarkBlue, 1), new System.Drawing.Point(i * 10, 0), new System.Drawing.Point(i * 10, 300));
+
+                SolidBrush brush = new SolidBrush(System.Drawing.Color.DarkBlue);
+                g.FillRectangle(brush, new DRectangle(0, 0, 30, 100));
+                g.FillRectangle(brush, new DRectangle(bMap.Width - 30, 0, 30, 100));
+                g.FillRectangle(brush, new DRectangle(0, bMap.Height - 100, 30, 100));
+                g.FillRectangle(brush, new DRectangle(bMap.Width - 30, bMap.Height - 100, 30, 100));
+            }
+
+            using (Graphics g = Graphics.FromImage(bCone))
+            {
+                DPoint[] conePoints = { new System.Drawing.Point(bCone.Width / 2, bCone.Height), new System.Drawing.Point(0, 0), new System.Drawing.Point(bCone.Width, 0) };
+                g.FillPolygon(new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(100, DColor.ForestGreen)), conePoints);
+            }
         }
 
         // Called from robot once initial spins are made. Sets the first localisation (always pointing north).
@@ -233,7 +239,6 @@ namespace PredatorPreyAssignment
             bool input;
             double mapProb = 0;
             double newProb = 0;
-            bool destFound = false;
 
             double maxProb = -1;
             DPoint maxIndex = new DPoint(-1, -1);
@@ -260,16 +265,8 @@ namespace PredatorPreyAssignment
                     }
                     if (newProb < 0.95 && newProb > 0.05)
                         probability[i, j] = newProb;
-                    else if (newProb > 0.75)
-                    {
-                        if (lookingForPrey)
-                        {
-                            //destination = new DPoint(i, j);
-                            destFound = true;
-                        }
-                        else
-                            finalMap[i, j] = true;
-                    }
+                    else if (newProb > 0.75 && !lookingForPrey)
+                        finalMap[i, j] = true;
                     else if (newProb > 0.5 && !lookingForPrey)
                         finalMap[i, j] = true;
                     else
@@ -282,9 +279,7 @@ namespace PredatorPreyAssignment
                 if (maxProb < 0.6)
                     destination = new DPoint(-1, -1);
                 else if (maxProb > 0.9)
-                {
                     destination = maxIndex;
-                }
             }
 
             //if (lookingForPrey && !destFound)
@@ -310,18 +305,37 @@ namespace PredatorPreyAssignment
             //picBoxCone.Location = new Point(0,0);
 
 
-            robot.cumulativeAngle = 0;
-            picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDist*100));
+            //robot.cumulativeAngle = 0;
+            //picBoxRovio.Location = new DPoint(100, 200);//(int)(robot.wallDist*100));
 
-            
+            testBool = true;
             if (testBool)
             {
-                Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
-                Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDist * 100));
 
-                Vector2 brandNew = Vector2.Lerp(oldP, newP, 0.1f);
-                //picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);
+
+                Vector2 oldP = new Vector2(picBoxRovio.Location.X, picBoxRovio.Location.Y);
+
+                Vector2 first = new Vector2(0, -1);
+
+                first = Vector2.Transform(-Vector2.UnitY, Matrix.CreateRotationZ(MathHelper.ToRadians((float)robot.cumulativeAngle)));
+                first /= MathHelper.Max(Math.Abs(first.X), Math.Abs(first.Y));
+                first += Vector2.One;
+                first *= new Vector2(260, 300) * 0.5f;
+
+
+               // Vector2 newP = new Vector2(picBoxRovio.Location.X, (int)((robot as Rovio.BaseArena).wallDist * 100));
+
                 
+
+                System.Drawing.Drawing2D.Matrix m = new System.Drawing.Drawing2D.Matrix();
+                m.Translate((int)first.X, (int)first.Y);
+                m.RotateAt((float)robot.cumulativeAngle, new DPoint(0, 0));
+                m.Translate(0f, (float)(robot.wallDist*100));
+                DPoint[] newPos = { new DPoint(0, 0) };
+                m.TransformPoints(newPos);
+
+                Vector2 brandNew = Vector2.Lerp(oldP, new Vector2(newPos[0].X, newPos[0].Y), 0.1f);
+                picBoxRovio.Location = new DPoint((int)brandNew.X, (int)brandNew.Y);                
             
             
             }
@@ -342,10 +356,10 @@ namespace PredatorPreyAssignment
                     {
                         for (int j = 0; j < maxY; j++)
                         {
-                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
-                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
+                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(preyProbability[i, j] * 255), System.Drawing.Color.DarkRed)), new DRectangle(i * 10, j * 10, 10, 10));
+                            g.FillRectangle(new SolidBrush(System.Drawing.Color.FromArgb((int)(obstacleProbability[i, j] * 255), System.Drawing.Color.DarkBlue)), new DRectangle(i * 10, j * 10, 10, 10));
                             if (aa.inPath[i, j])
-                                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new System.Drawing.Rectangle(i * 10, j * 10, 10, 10));
+                                g.FillRectangle(new SolidBrush(System.Drawing.Color.Red), new DRectangle(i * 10, j * 10, 10, 10));
                         }
                     }
 
@@ -516,7 +530,7 @@ namespace PredatorPreyAssignment
 
                         System.Drawing.Drawing2D.Matrix mx = new System.Drawing.Drawing2D.Matrix();
                         mx.RotateAt((float)robot.cumulativeAngle, leftPoint);
-                        mx.Translate(0, -25);
+                        mx.Translate(0, -0f);
                         DPoint[] tempPointArr = {leftPoint};
                         mx.TransformPoints(tempPointArr);
                         leftPoint = tempPointArr[0];
@@ -555,7 +569,7 @@ namespace PredatorPreyAssignment
 
                     Bitmap newCone = new Bitmap(260, 300);
                     gr = Graphics.FromImage(newCone);
-                    gr.FillPolygon(new SolidBrush(DColor.FromArgb(100, DColor.ForestGreen)), aPoints);
+                    gr.FillPolygon(new SolidBrush(DColor.FromArgb(100, DColor.ForestGreen)), viewConePoints);
 
                     picBoxCone.Image = newCone;
 

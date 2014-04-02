@@ -122,7 +122,7 @@
             // 
             this.textBoxIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxIP.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.textBoxIP.Location = new System.Drawing.Point(340, 364);
+            this.textBoxIP.Location = new System.Drawing.Point(174, 361);
             this.textBoxIP.Name = "textBoxIP";
             this.textBoxIP.Size = new System.Drawing.Size(123, 20);
             this.textBoxIP.TabIndex = 0;
@@ -132,9 +132,9 @@
             // buttonStop
             // 
             this.buttonStop.Enabled = false;
-            this.buttonStop.Location = new System.Drawing.Point(197, 361);
+            this.buttonStop.Location = new System.Drawing.Point(94, 359);
             this.buttonStop.Name = "buttonStop";
-            this.buttonStop.Size = new System.Drawing.Size(137, 23);
+            this.buttonStop.Size = new System.Drawing.Size(74, 23);
             this.buttonStop.TabIndex = 0;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
@@ -192,7 +192,7 @@
             this.buttonPredatorFSM.Name = "buttonPredatorFSM";
             this.buttonPredatorFSM.Size = new System.Drawing.Size(75, 23);
             this.buttonPredatorFSM.TabIndex = 0;
-            this.buttonPredatorFSM.Text = "PredatorFSM";
+            this.buttonPredatorFSM.Text = "PredatorSimple";
             this.buttonPredatorFSM.UseVisualStyleBackColor = true;
             // 
             // picBoxUserLabels
@@ -226,6 +226,8 @@
             this.Controls.Add(this.picboxCameraImage);
             this.KeyPreview = true;
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(767, 435);
+            this.MinimumSize = new System.Drawing.Size(767, 435);
             this.Name = "MainForm";
             this.Text = "ImageViewer";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImageViewer_FormClosed);

@@ -76,6 +76,7 @@ namespace PredatorPreyAssignment
         /// <param name="from">Start position.</param>
         public void Build(bool[,] map, Point to, Point from)
         {
+            // If the current position or destination do not register as on the map, exit.
             if (!IsValid(to) || !IsValid(from))
                 return;
 
@@ -83,6 +84,7 @@ namespace PredatorPreyAssignment
             Point currentPosition = from;
             closed[from.X, from.Y] = true;
 
+            // If the input map indicates a space is occupied, add it to the closed list.
             for (int i = 0; i < mapDimensions.X; i++)
                 for (int j = 0; j < mapDimensions.Y; j++)
                     if (map[i, j])
@@ -151,6 +153,7 @@ namespace PredatorPreyAssignment
         private void SetCost(Point currentPosition, Point dest, int x, int y)
         {
             int moveCost;
+            // Change the cost if moving diagonally.
             if (x == 0 || y == 0)
                 moveCost = 10;
             else

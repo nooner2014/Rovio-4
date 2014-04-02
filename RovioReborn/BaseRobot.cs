@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define TESTING
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +8,7 @@ using System.Drawing;
 using System.Timers;
 using System.Windows.Forms;
 using PredatorPreyAssignment;
+using System.Diagnostics;
 
 namespace Rovio
 {
@@ -35,6 +38,11 @@ namespace Rovio
         protected System.Threading.Thread threadKeyboardInput;
         protected bool connected = true;
 
+
+#if TESTING
+        Stopwatch stopwatchReceivingImage = new Stopwatch();
+        Stopwatch stopwatchReceivingSensor = new Stopwatch();
+#endif
         /// <summary>
         /// Constructor - initialises variables for derived classes.
         /// </summary>
@@ -108,8 +116,17 @@ namespace Rovio
         protected void ImageGet()
         {
             while (running)
+            {
+#if TESTING
+                stopwatchReceivingImage.Start();
+#endif
                 lock (commandLock)
                     cameraImage = Camera.Image;
+#if TESTING
+                Console.WriteLine("Image capture time: " + stopwatchReceivingImage.ElapsedMilliseconds.ToString());
+                stopwatchReceivingImage.Reset();
+#endif
+            }
         }
 
         /// <summary>
@@ -127,23 +144,6 @@ namespace Rovio
                     if (keys.Count == 1)
                         KeyboardInput();
         }
-
-        /// <summary>
-        /// Find the modal value within a list (returns newP occurance in the case of equal values).
-        /// </summary>
-        /// <typeparam name="T">Type of elements in the list.</typeparam>
-        /// <param name="list">List of elements within which to find the modal value</param>
-        /// <returns>The modal value of the list.</returns>
-        private T Mode<T>(List<T> list)
-        {
-            return list.GroupBy(x => x)
-                .Select(g => new { Value = g.Key, Count = g.Count() })
-                .OrderByDescending(a => a.Count).First().Value;
-        }
-
-        //public delegate void ImageReady(Image image);
-       // public event ImageReady SourceImage;
-
         
         /// <summary>
         /// Begin the end of threads by setting the condition of all threads to false.
@@ -183,10 +183,7 @@ namespace Rovio
                         Drive.DiagForwardLeft(Math.Abs(speed));
                     else
                         Drive.DiagBackwardRight(speed);
-
-                    //cameraImage = Camera.Image;
                 }
-                //Drive.Stop();
             }
         }
 
@@ -250,9 +247,16 @@ namespace Rovio
         /// </summary>
         protected void GetFormInformation()
         {
+#if TESTING
+            stopwatchReceivingSensor.Start();
+#endif
             batteryStatus = API.Movement.Report.BatteryLevel;
             chargingStatus = API.Movement.Report.Charging;
-            irSensor = IRSensor.Detection;        
+            irSensor = IRSensor.Detection;
+#if TESTING
+            Console.WriteLine("Sensor capture time: " + stopwatchReceivingImage.ElapsedMilliseconds.ToString());
+            stopwatchReceivingSensor.Reset();
+#endif
         }
 
         /// <summary>
@@ -277,11 +281,6 @@ namespace Rovio
             dict.TryGetValue(colour + "LumMax", out right);
             filter.Luminance = new AForge.Range(left, right);
         }
-
-
-        ////////////////////////////////////////////////////
-        //////////////////Image processing//////////////////
-        ////////////////////////////////////////////////////
 
         /// <summary>
         /// Takes in an image and rewrites it to 24bpp RGB (e.graphics. for converting binary image to a compatible pixel format for further work).
@@ -374,8 +373,6 @@ namespace Rovio
             System.Drawing.Rectangle[] rectangles = blobs.GetObjectsRectangles();
 
             return rectangles;
-
-            //return new System.Drawing.Rectangle[] {new System.Drawing.System.Drawing.Rectangle(0, 0, 0, 0)};
         }
 
         /// <summary>
@@ -404,138 +401,8 @@ namespace Rovio
         protected Bitmap DrawLineFromPoints(Bitmap image, System.Drawing.Point[] pointArr, System.Drawing.Color colour, float lineWeight)
         {
             Graphics rectPen = Graphics.FromImage(image);
-            //rectPen.FillPolygon(new SolidBrush(colour), pointArr, System.Drawing.Drawing2D.FillMode.Winding);
             rectPen.DrawPolygon(new Pen(colour, 3.0f), pointArr);
             return image;
         }
-
-        public bool MYTESTBOOL = false;
-        // Old
-        /*
-        public System.Drawing.Rectangle DetectPrey(Bitmap image, Vector2 minRect)
-        {
-            AForge.Imaging.Filters.HSLFiltering filter = new AForge.Imaging.Filters.HSLFiltering();
-            filter.Hue = new AForge.IntRange(355, 20);
-            filter.Saturation = new AForge.Range(0.5f, 1.8f);
-            filter.Luminance = new AForge.Range(0.15f, 1.0f);
-            Bitmap filtered = filter.Apply(image);
-
-            short[,] structuringElement = new short[,] { { 0, 1, 0 }, { 1, 1, 1 }, { 0, 1, 0 } };
-            filtered = BinaryImage(filtered, 1);
-            AForge.Imaging.Filters.Opening openingFilter = new AForge.Imaging.Filters.Opening(structuringElement);
-            filtered = openingFilter.Apply(filtered);
-
-            AForge.Imaging.BlobCounter blobs = new AForge.Imaging.BlobCounter(filtered);
-            System.Drawing.Rectangle[] rectangles = blobs.GetObjectsRectangles();
-
-            int size = 0;
-            int chosen = 0;
-
-            for (int i = 0; i < rectangles.Length; i++)
-            {
-                int newSize = rectangles[i].Height * rectangles[i].Width;
-
-                if (size < newSize)
-                {
-                    chosen = i;
-                    size = newSize;
-                }
-            }
-            Graphics rect = Graphics.FromImage(image);
-
-            if (rectangles.Length != 0)
-            {
-                if (rectangles[chosen].Width > minRect.X && rectangles[chosen].Height > minRect.Y)
-                {
-                    trackingState = Tracking.OnScreen;
-                    Hunt(rectangles[chosen]);
-                    return rectangles[chosen];
-                }
-            }
-            return new System.Drawing.System.Drawing.Rectangle(0, 0, 0, 0);
-        }
-
-       
-
-
-        public Bitmap DetectObject(Bitmap image)
-        {            
-            AForge.Imaging.Filters.HSLFiltering filter = new AForge.Imaging.Filters.HSLFiltering();
-            filter.Hue = new AForge.IntRange(355, 20);
-            filter.Saturation = new AForge.Range(0.5f, 1.8f);
-            filter.Luminance = new AForge.Range(0.15f, 1.0f);
-            Bitmap filtered = filter.Apply(image);
-
-            
-            short[,] se = new short[,] {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
-            filtered = BinaryImage(filtered, 1);
-            AForge.Imaging.Filters.Opening ffFilter = new AForge.Imaging.Filters.Opening(se);
-            filtered = ffFilter.Apply(filtered);
-
-
-            AForge.Imaging.BlobCounter blobs = new AForge.Imaging.BlobCounter(filtered);
-            System.Drawing.Rectangle[] rectangles = blobs.GetObjectsRectangles();
-
-            int size = 0;
-            int chosen = 0;
-
-            for (int i = 0; i < rectangles.Length; i++)
-            {
-                int newSize = rectangles[i].Height * rectangles[i].Width;
-
-                if (size < newSize)
-                {
-                    chosen = i;
-                    size = newSize;
-                }
-            }
-
-           //return filtered;
-            Graphics rect = Graphics.FromImage(image);
-
-           
-
-            if (rectangles.Length != 0)
-            {
-                if (rectangles[chosen].Width > 15 && rectangles[chosen].Height > 10)
-                {
-                    preyScreenPosition = new System.Drawing.System.Drawing.Rectangle(rectangles[chosen].X, rectangles[chosen].Y, rectangles[chosen].Width, rectangles[chosen].Height);
-                    trackingState = Tracking.OnScreen;
-                    rect.DrawSystem.Drawing.Rectangle(new Pen(System.Drawing.Color.Green, 3f), rectangles[chosen]);
-                    totalTime = 0;
-                    Hunt(rectangles[chosen]);
-                }
-                else if (checkingOnScreenTimer < 5)
-                {
-                    checkingOnScreenTimer++;
-                }                
-            }
-            else if (rectangles.Length == 0)
-            {
-                if (roamingRotationCount < 20)
-                    trackingState = Tracking.Searching;
-                else
-                    trackingState = Tracking.Roaming;
-            }
-
-            if (trackingState == Tracking.Searching)
-            {
-                roamingRotationCount++;
-                for (int i = 0; i < 2; i++)
-                    if (preyScreenPosition.X < cameraWidth.X/2)
-                        Drive.RotateLeft(3);
-                    else
-                        Drive.RotateRight(3);
-                Drive.Stop();
-
-                Console.WriteLine(circleCount);
-            }
-            return image;
-        }
-
-        
-         * 
-         * */
-
     }
 }

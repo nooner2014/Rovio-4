@@ -33,7 +33,9 @@ namespace PredatorPreyAssignment
         private List<NumericUpDown> filterUpDowns = new List<NumericUpDown>();
         private List<NumericUpDown> imageSegmentingAdjusters = new List<NumericUpDown>();
 
-        // Form initialisation.
+        /// <summary>
+        /// Form initialisation.
+        /// </summary>
         private void ImageViewer_Load(object sender, EventArgs e)
         {
             textBoxIP.Text = robotURL;
@@ -50,11 +52,9 @@ namespace PredatorPreyAssignment
             FilterChangersSetup(filterUpDowns, "yellow");
             FilterChangersSetup(filterUpDowns, "white");
 
-
             SetUserControlLabels();
 
             robotButtonEventHandler = RobotButtonHandler;
-
             buttonPredator.Click += robotButtonEventHandler;
             buttonPredatorFSM.Click += robotButtonEventHandler;
             buttonUser.Click += robotButtonEventHandler;
@@ -63,21 +63,15 @@ namespace PredatorPreyAssignment
             Show();
             Text = "BLA11210972 Computer Vision & Robotics Predator/Prey";
             Label l = new Label();
-
-            //Show();
-            //imageSegmentingAdjustersTest[0].ValueChanged += handler;
-            // Start predator thread.
             Focus();
-
-
-
         }
 
-        // Set robot based on the string from the form button pressed.
+        /// <summary>
+        /// Set robot based on the string from the form button pressed.
+        /// </summary>
+        /// <param name="type">Which robot to start.</param>
         private void InitialiseRobot(string type)
         {
-
-            //System.Threading.Thread.Sleep(2000);
             buttonPredator.Enabled = true;
             buttonUser.Enabled = true;
             buttonPredatorFSM.Enabled = true;
@@ -96,7 +90,6 @@ namespace PredatorPreyAssignment
                     map = null;
                 }
             }
-
 
             if (type == "Predator")
             {
@@ -118,7 +111,7 @@ namespace PredatorPreyAssignment
                 robot_thread = new System.Threading.Thread(robot.Start);
                 robot_thread.Start();
             }
-            else if (type == "PredatorFSM")
+            else if (type == "PredatorSimple")
             {
                 if (map != null)
                     map.Hide();
@@ -145,7 +138,7 @@ namespace PredatorPreyAssignment
                 robot_thread.Start();
             }
 
-            if (type == "Predator" || type == "PredatorFSM" || type == "User")
+            if (type == "Predator" || type == "PredatorSimple" || type == "User")
             {
                 picboxCameraImage.Location = new Point(20, 22);
                 picboxCameraImage.Size = new Size((int)robot.cameraDimensions.X, (int)robot.cameraDimensions.Y);
@@ -164,7 +157,9 @@ namespace PredatorPreyAssignment
             }
         }
 
-        // Set default filter values in dictionary.
+        /// <summary>
+        /// Set default filter values in dictionary.
+        /// </summary>
         private void ReadDictValues()
         {
             string line = "";
@@ -197,7 +192,11 @@ namespace PredatorPreyAssignment
             }
         }
 
-        // Set filter changers in form.
+        /// <summary>
+        /// Set filter changers in form.
+        /// </summary>
+        /// <param name="list">List of numerican up/downs to add</param>
+        /// <param name="col">Which colour filter is being used.</param>
         private void FilterChangersSetup(List<NumericUpDown> list, string col)
         {
             Point imageSegmentingAdjustingLocation = new Point(picboxCameraImage.Location.X + picboxCameraImage.Size.Width + 30 + (120 * (list.Count / 12)/3), 85);
@@ -259,20 +258,23 @@ namespace PredatorPreyAssignment
                 filterLabels[list.Count / 6].Size = new Size(40, 15);
                 filterLabels[list.Count / 6].Text = col[0].ToString().ToUpper() + col.Substring(1);
                 Controls.Add(filterLabels[list.Count / 6]);
-
-                
             }
             for (int i = 0; i < filterLabels.Count; i++)
                 filterLabels[i].Visible = false;
         }
 
-        // Handler for the buttons to switch robot types.
+        /// <summary>
+        /// Handler for the buttons to switch robot types.
+        /// </summary>
         private void RobotButtonHandler(object sender, EventArgs e)
         { 
             InitialiseRobot((sender as Button).Text);
         }
 
-        // Choose whether the filter changers appear on the form.
+        /// <summary>
+        /// Choose whether the filter changers appear on the form.
+        /// </summary>
+        /// <param name="input">Whether changer is visible.</param>
         private void SetFilterChangerVisibility(bool input)
         {
             for (int i = 0; i < filterUpDowns.Count; i++)
@@ -287,7 +289,9 @@ namespace PredatorPreyAssignment
                 filterLabels[i].Visible = input;
         }
 
-        // Set the labels to appear when user controls are enabled.
+        /// <summary>
+        /// Set the labels to appear when user controls are enabled.
+        /// </summary>
         private void SetUserControlLabels()
         {
             Bitmap b = new Bitmap(300, 300);
@@ -315,7 +319,11 @@ namespace PredatorPreyAssignment
             picBoxUserLabels.Visible = false;
         }
 
-        // Receive a picture box image from the classes.
+        /// <summary>
+        /// Receive a picture box image from the classes.
+        /// </summary>
+        /// <param name="pB">PictureBox to change</param>
+        /// <param name="point">Location of PictureBox</param>
         public void UpdatePictureBox(PictureBox pB, System.Drawing.Point point)
         {
             if (InvokeRequired)
@@ -324,11 +332,12 @@ namespace PredatorPreyAssignment
                 pB.Location = point;   
         }
 
-        // Update form picture box
+        /// <summary>
+        /// Update form picture box
+        /// </summary>
+        /// <param name="image">Image to assign to PictureBox.</param>
         public void UpdateImage(Image image)
         {
-               
-
             if (this.InvokeRequired)
             {
                 try
@@ -338,11 +347,11 @@ namespace PredatorPreyAssignment
                 }
                 catch { }
             }
-            //else
-               // this.ClientSize = picboxCameraImage.Image.Size;
         }
 
-        // Abort thread and close window.
+        /// <summary>
+        /// Abort thread and close window.
+        /// </summary>
         private void ImageViewer_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (robot != null)
@@ -355,7 +364,9 @@ namespace PredatorPreyAssignment
             Environment.Exit(0);
         }
 
-        // Key down - adds key to dictionary if it is not already there.
+        /// <summary>
+        /// Key down - adds key to dictionary if it is not already there.
+        /// </summary>
         private void ImageViewer_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
@@ -364,13 +375,17 @@ namespace PredatorPreyAssignment
                 currentKeys.Add(Convert.ToInt32(e.KeyCode));
         }
 
-        // Key up - removes key from dictionary.
+        /// <summary>
+        /// Key up - removes key from dictionary.
+        /// </summary>
         private void ImageViewer_KeyUp(object sender, KeyEventArgs e)
         {
             currentKeys.Remove(Convert.ToInt32(e.KeyCode));
         }
 
-        // Handles changing values for the filter numerical up downs.
+        /// <summary>
+        /// Handles changing values for the filter numerical up downs.
+        /// </summary>
         private void UpDownHandler(object sender, EventArgs e)
         { 
             if (valueDict.ContainsKey((sender as NumericUpDown).Name.ToString()))
@@ -380,7 +395,9 @@ namespace PredatorPreyAssignment
             }
         }
 
-        // Receives new string value when the IP text box is changed.
+        /// <summary>
+        /// Receives new string value when the IP text box is changed.
+        /// </summary>
         private void textBoxIP_TextChanged(object sender, EventArgs e)
         {
             robotURL = textBoxIP.Text;

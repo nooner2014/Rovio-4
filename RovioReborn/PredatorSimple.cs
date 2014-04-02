@@ -8,22 +8,21 @@ namespace Rovio
 {
     class PredatorSimple : BaseArena
     {
-
-        enum PredatorState
+        private enum PredatorState
         {
             SearchForObstacle,
             GoingAroundObstacle,
             ApproachingPrey,
-            OnScreen,
+            OnScreen, // Not a state per se, but an indicator for switching.
             SearchingForPrey,
-            //Roaming,
         };
 
-        PredatorState trackingState = PredatorState.SearchForObstacle;
-        GreenBlockState greenBlockState = GreenBlockState.InitialAproach;
-        System.Threading.Thread threadSearch;
-        System.Threading.Thread threadMove;
-
+        private PredatorState trackingState = PredatorState.SearchForObstacle;
+        private GreenBlockState greenBlockState = GreenBlockState.InitialAproach;
+        private System.Threading.Thread threadSearch;
+        private System.Threading.Thread threadMove;
+        int odometryCount = 0;
+        int strafingDirection = -3;
 
         public PredatorSimple(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
@@ -55,7 +54,7 @@ namespace Rovio
         /// <summary>
         /// Begin the state machine.
         /// </summary>
-        protected void SetFiniteStateMachine()
+        private void SetFiniteStateMachine()
         {
             while (running)
             {
@@ -64,8 +63,6 @@ namespace Rovio
                 // {
 
                 // Update state machine action based on latest readings.
-               Console.WriteLine(trackingState.ToString());
-               Console.WriteLine(cumulativeAngle);
                if (preyRectangle != new System.Drawing.Rectangle(0, 0, 0, 0))
                {
                    cumulativeAngle = 0;
@@ -179,7 +176,7 @@ namespace Rovio
         /// <summary>
         /// States exclusive to moving around the green block.
         /// </summary>
-        enum GreenBlockState
+        private enum GreenBlockState
         { 
             InitialAproach,
             StrafeAround,
@@ -187,9 +184,6 @@ namespace Rovio
             Rotate,
         }
 
-
-        int odometryCount = 0;
-        int strafingDirection = -3;
         /// <summary>
         /// Move around the green block (obstacle).
         /// </summary>
@@ -207,8 +201,7 @@ namespace Rovio
             else if (greenBlockState == GreenBlockState.StrafeAround)
             {
                 if ((IsObstacleSeen() && obstacleRectangle.Width > 15))
-                {//|| !(obstacleRectangle == System.Drawing.Rectangle.Empty))//obstacleRectangle.X < cameraDimensions.Y - (cameraDimensions.Y / 5))
-                    
+                {                    
                     Strafe(4, strafingDirection);
                     lock (commandLock)
                     {
@@ -227,8 +220,6 @@ namespace Rovio
                 }
                 else
                     greenBlockState = GreenBlockState.MoveForwardSome;
-
-                
             }
             else if (greenBlockState == GreenBlockState.MoveForwardSome)
             {
@@ -240,7 +231,6 @@ namespace Rovio
                 RotateByAngle(2, 2);
                 greenBlockState = GreenBlockState.InitialAproach;
                 trackingState = PredatorState.SearchingForPrey;
-
             }
         }
 
@@ -249,17 +239,11 @@ namespace Rovio
         /// </summary>
         protected void Search()
         {
-            // Rotate to look for prey - direction of rotation depends on which side of the screen prey left from.
             if (preyScreenPosition.X < cameraDimensions.X / 2)
                 RotateDirection(1, -3);
             else
                 RotateDirection(1, 3);
-            //lock (commandLock)
-                //Drive.Stop();
-            // Keep track of how long we have been searching. If we've been looking for a while, resume roaming.
             searchingRotationCount++;
-            //if (searchingRotationCount > 8)
-                //trackingState = Tracking.Roaming;
 
         }
 
@@ -268,13 +252,11 @@ namespace Rovio
         /// </summary>
         protected void Approach()
         {
-
-            // If prey is not centred, rotate to it. Otherwise threadMove forward until it's within a certain threadFindWallDistance.
             searchingRotationCount = 0;
             if (preyScreenPosition.X < 0 + cameraDimensions.X / 5)
-                RotateDirection(1, -4);
+                RotateDirection(2, -4);
             else if (preyScreenPosition.X > cameraDimensions.X - cameraDimensions.X / 5)
-                RotateDirection(1, 4);
+                RotateDirection(2, 4);
             else if (preyRectangle.Width < 80)
             {
                 trackingState = PredatorState.ApproachingPrey;
@@ -288,36 +270,5 @@ namespace Rovio
             else
                 searchingRotationCount = 0;
         }
-
-        /*
-        private void Roam()
-        {
-            //if (wallHeight > 20)
-            //{
-
-            // If we are near a wall or obstacle, drive back from it and then rotate in a direction depending on which way we're facing.
-            if (irSensor || wallLineHeight > 15)
-            {
-
-                MoveForward(6, -1);
-                if (wallLeftPoint.Y > wallRightPoint.Y)
-                    RotateDirection(2, 3);
-                else
-                    RotateDirection(2, -3);
-            }
-
-            // If not directly in front of an obstacle, keep moving.
-            else if ((obstacleRectangle.Height < 200 || obstacleRectangle.Width < 100))// && (wallLineRectangle.Height > 25 || wallLineRectangle.Height < 40))
-                MoveForward(3, 1);
-            // Must be in front of an obstacle, so rotate from it depending on which direction it's at.
-            else
-            {
-                if (obstacleRectangle.X > cameraDimensions.X / 8)
-                    RotateDirection(2, -3);
-                else
-                    RotateDirection(2, 3);
-            }
-           // trackingState = Tracking.Roaming;
-        }*/
     }
 }

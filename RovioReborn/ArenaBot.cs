@@ -66,11 +66,11 @@ namespace Rovio
         private bool obstacleSeen = false;
         private float obstacleDistance = 0;
         private float blueLineThickness = 0;
-        public double northDist = double.PositiveInfinity;
-        public double westDist = double.PositiveInfinity;
-        public double southDist = double.PositiveInfinity;
-        public double eastDist = double.PositiveInfinity;
-        public double wallDistance = double.PositiveInfinity;
+        private double northDist = double.PositiveInfinity;
+        private double westDist = double.PositiveInfinity;
+        private double southDist = double.PositiveInfinity;
+        private double eastDist = double.PositiveInfinity;
+        protected double wallDistance = double.PositiveInfinity;
         protected char lastReadDirection;
 
         public bool IsPreySeen() { return preySeen; }
@@ -78,6 +78,11 @@ namespace Rovio
         public float GetPreyDistance() { return preyDistance; }
         public float GetObstacleDistance() { return obstacleDistance; }
 
+        public double GetNorthDist() { return northDist; }
+        public double GetWestDist() { return westDist; }
+        public double GetSouthDist() { return southDist; }
+        public double GetEastDist() { return eastDist; }
+        public double GetWallDist() { return wallDistance; }
         protected int outputImageKey = 0;
 
 
@@ -122,35 +127,44 @@ namespace Rovio
         /// </summary>
         /// <param name="final">Average of all gathered distances</param>
         /// <param name="moveAfter">Whether to rotate 90 degrees after gathering data.</param>
-        protected void FindWallDistance(out double final, bool moveAfter)
+        protected void FindWallDistance(ref double final, bool moveAfter)
         {
-            List<double> arr = new List<double>();
-            Stopwatch s = new Stopwatch();
-            s.Start();
-
-            double dist = 0;
-            while (s.ElapsedMilliseconds < 3000)
+            while (running)
             {
-              
-                dist = 6.5 / blueLineThickness;
+                List<double> arr = new List<double>();
+                Stopwatch s = new Stopwatch();
+                s.Start();
 
-                if (dist != 0 && !double.IsInfinity(dist))
-                    arr.Add(Math.Abs(dist));
+                double dist = 0;
+                while (s.ElapsedMilliseconds < 1000)
+                {
+                    if (blueLineRectangle.Width > 30 || secondBlueLineRectangle.Width > 30)
+                    {
+                        dist = 6.5 / blueLineThickness;
 
-                if (dist > 3)
-                    arr.Remove(dist);
-                System.Threading.Thread.Sleep(100);
+                        if (dist != 0 && !double.IsInfinity(dist))
+                            arr.Add(Math.Abs(dist));
+
+                        if (dist > 3)
+                            arr.Remove(dist);
+                        System.Threading.Thread.Sleep(30);
+                    }
+                }
+
+
+                if (arr.Count != 0)
+                {
+
+                    final = MathHelper.Lerp((float)final, (float)arr.Average(), 0.3f);
+                }
+                else
+                    final = 15;
+
+                if (!running)
+                    return;
+                else if (moveAfter)
+                    RotateByAngle(3, 3);
             }
-
-            if (arr.Count != 0)
-                final = arr.Average();
-            else
-                final = 15;
-
-            if (!running)
-                return;
-            else if (moveAfter)
-                RotateByAngle(3, 3);
         }
 
         /// <summary>
@@ -282,7 +296,7 @@ namespace Rovio
                 if (degAngle < 0)
                     degAngle += 360;
                 Console.WriteLine(degAngle);
-                cumulativeAngle = degAngle;// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
+                cumulativeAngle = MathHelper.Lerp(cumulativeAngle, degAngle, 0.2f);// Lerp(new System.Drawing.Point((int)cumulativeAngle), new System.Drawing.Point((int)degAngle), 0.1f).X;
             }
         }
         

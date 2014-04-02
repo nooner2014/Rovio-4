@@ -19,26 +19,22 @@ namespace Rovio
         }
 
         /// <summary>
-        /// Override 
+        /// Implement the start function in the base class, to be called by form.
         /// </summary>
         public override void Start()
         {
             Bitmap outputImage = new Bitmap(cameraDimensions.X, cameraDimensions.Y);
             while (running)
             {
-                //lock (commandLock)
-                //{
-                    outputImage = cameraImage;
+                outputImage = cameraImage;
                 lock(commandLock)
                     SourceImage(outputImage);
-                //}
             }
         }
 
-
-        // = Convert.ToInt32(a);
-
-        // Take pressed keys for user movement. 
+        /// <summary>
+        /// Implement base class method to define user input.
+        /// </summary>
         protected override void KeyboardInput()
         {
             // while (true)

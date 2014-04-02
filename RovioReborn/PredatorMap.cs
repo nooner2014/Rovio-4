@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using PredatorPreyAssignment;
@@ -11,6 +12,7 @@ namespace Rovio
 
         System.Threading.Thread threadFindHeading;
         System.Threading.Thread threadFindWallDistance;
+        System.Threading.Thread threadMovement;
 
         public PredatorMap(string address, string user, string password, Map m, Object k)
             : base(address, user, password, m, k)
@@ -41,9 +43,11 @@ namespace Rovio
             threadFindHeading = new System.Threading.Thread(FindHeading);
             threadFindHeading.Start();
 
-            threadFindWallDistance = new System.Threading.Thread(() => FindWallDistance(out wallDistance, false));
+            threadFindWallDistance = new System.Threading.Thread(() => FindWallDistance(ref wallDistance, false));
             threadFindWallDistance.Start();
 
+            threadMovement = new System.Threading.Thread(Movement);
+           // threadMovement.Start();
             while (running && connected)
             {
                 //wallLineHeight = 0;
@@ -52,7 +56,7 @@ namespace Rovio
 
                 //wallLineHeight -= 0.2f;
 
-                System.Threading.Thread.Sleep(1000);
+                //System.Threading.Thread.Sleep(1000);
                 //lock (commandLock)
                 //lock (mapLock)
                 //if (!(trackingState == Tracking.Initial))
@@ -60,6 +64,27 @@ namespace Rovio
 
                 
                 //FindDirection();
+
+            }
+        }
+
+        private void Movement()
+        {
+            while (running)
+            {
+                double targetAngle = 0;
+                if (map.GetDestination() != new Point(-1, -1))
+                {
+                    while (Math.Abs(cumulativeAngle - targetAngle) > 35)
+                    {
+                        if (targetAngle > cumulativeAngle)
+                            RotateByAngle(1, 3);
+                        else
+                            RotateByAngle(-1, 3);
+                    }
+
+                    MoveForward(5, 1);
+                }
 
             }
         }

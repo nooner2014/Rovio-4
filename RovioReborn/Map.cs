@@ -49,8 +49,9 @@ namespace PredatorPreyAssignment
         public delegate void UpdatePictureBox(PictureBox pB, System.Drawing.Point point);
         public event UpdatePictureBox UpdatePicBox;
         public void Hide() { picBoxMap.Hide(); }
+        public DPoint GetDestination() { return destination; }
 
-        bool testBool = false;
+        private List<DPoint> aStarPath = new List<DPoint>(); 
 
         private DPoint destination = new DPoint(-1, -1);
         Graphics graphics;
@@ -181,31 +182,28 @@ namespace PredatorPreyAssignment
             double x = 0;
             double y = 0;
 
-            if ((robot as Rovio.BaseArena).northDist > (robot as Rovio.BaseArena).southDist)
-                y = 3 - (robot as Rovio.BaseArena).southDist;
+            if ((robot as Rovio.BaseArena).GetNorthDist() > (robot as Rovio.BaseArena).GetSouthDist())
+                y = 3 - (robot as Rovio.BaseArena).GetSouthDist();
             else
-                y = (robot as Rovio.BaseArena).northDist;
+                y = (robot as Rovio.BaseArena).GetNorthDist();
 
-            if ((robot as Rovio.BaseArena).eastDist > (robot as Rovio.BaseArena).westDist)
-                x = (robot as Rovio.BaseArena).westDist;
+            if ((robot as Rovio.BaseArena).GetEastDist() > (robot as Rovio.BaseArena).GetWestDist())
+                x = (robot as Rovio.BaseArena).GetWestDist();
             else
-                x = 2.64 - (robot as Rovio.BaseArena).eastDist;
+                x = 2.64 - (robot as Rovio.BaseArena).GetEastDist();
 
-            if (((robot as Rovio.BaseArena).northDist > 0.9 && (robot as Rovio.BaseArena).northDist < 2.3 && (robot as Rovio.BaseArena).southDist < 2.3 && (robot as Rovio.BaseArena).southDist > 0.9)
-                || ((robot as Rovio.BaseArena).southDist > 0.9 && (robot as Rovio.BaseArena).southDist < 2.3 && (robot as Rovio.BaseArena).northDist < 2.3 && (robot as Rovio.BaseArena).northDist > 0.9)
-                && !double.IsInfinity((robot as Rovio.BaseArena).northDist) && !double.IsInfinity((robot as Rovio.BaseArena).southDist))// && x < 1.0)
+            if (((robot as Rovio.BaseArena).GetNorthDist() > 0.9 && (robot as Rovio.BaseArena).GetNorthDist() < 2.3 && (robot as Rovio.BaseArena).GetSouthDist() < 2.3 && (robot as Rovio.BaseArena).GetSouthDist() > 0.9)
+                || ((robot as Rovio.BaseArena).GetSouthDist() > 0.9 && (robot as Rovio.BaseArena).GetSouthDist() < 2.3 && (robot as Rovio.BaseArena).GetNorthDist() < 2.3 && (robot as Rovio.BaseArena).GetNorthDist() > 0.9)
+                && !double.IsInfinity((robot as Rovio.BaseArena).GetNorthDist()) && !double.IsInfinity((robot as Rovio.BaseArena).GetSouthDist()))// && x < 1.0)
                 x -= 0.32;
-            else if (x > 2)//if ((robot as Rovio.Predator).eastDist > (robot as Rovio.Predator).westDist)
+            else if (x > 2)//if ((robot as Rovio.Predator).GetEastDist() > (robot as Rovio.Predator).GetWestDist())
                 x -= 0.32;
 
 
             //picBoxCone.Show();
 
             UpdatePicBox(picBoxRovio, new System.Drawing.Point((int)(x * 100), (int)(y * 100)));
-            //UpdatePicBox(picBoxCone, new Point(picBoxRovio.Location.X-(picBoxCone.Size.Width/2)+(picBoxRovio.Width/2), picBoxRovio.Location.Y-picBoxCone.Size.Width));
-            testBool = true;
-
-            
+            //UpdatePicBox(picBoxCone, new Point(picBoxRovio.Location.X-(picBoxCone.Size.Width/2)+(picBoxRovio.Width/2), picBoxRovio.Location.Y-picBoxCone.Size.Width));            
             
         }
 
@@ -237,9 +235,9 @@ namespace PredatorPreyAssignment
         private double GetPreyProbability(bool map, bool input)
         {
             if (map && input)
-                return 0.9;
+                return 0.99;
             else if (map && !input)
-                return 0.48;
+                return 0.45;
             else if (!map && input)
                 return 0.39;
             else //if (!map && !input)
@@ -337,10 +335,22 @@ namespace PredatorPreyAssignment
             {
                 matrix.Translate((int)newP.X, (int)newP.Y);
                 matrix.RotateAt((float)robot.cumulativeAngle, new DPoint(0, 0));
-                matrix.Translate(0f, (float)(robot.wallDistance * 100));
+                matrix.Translate(0f, (float)(robot.GetWallDist() * 100));
                 DPoint[] newPos = { new DPoint(0, 0) };
                 matrix.TransformPoints(newPos);
+
+                if (newPos[0].X < -400 || newPos[0].X > 600)
+                    newPos[0] = new DPoint(-100, -100);
+
+                if (newPos[0].X < 30 && (newPos[0].Y < 100 || newPos[0].Y > 200))
+                    newPos[0].X += 30;
+                else if (newP.X > 230 && (newPos[0].Y < 100 || newPos[0].Y > 200))
+                    newPos[0].X -= 30;
                 newP = Vector2.Lerp(oldP, new Vector2(newPos[0].X, newPos[0].Y), 0.1f);
+
+                // Compensate for the alcoves.
+                
+                
                 picBoxRovio.Location = new DPoint((int)newP.X, (int)newP.Y);   
             }
         }
@@ -371,7 +381,7 @@ namespace PredatorPreyAssignment
                 {
                     AStar astar = new AStar(finalMap.GetLength(0), finalMap.GetLength(1));
                     astar.Build(finalMap, new DPoint(destination.X, destination.Y), new DPoint((picBoxRovio.Location.X / 10) + (picBoxRovio.Width / 10 / 2), picBoxRovio.Location.Y / 10));
-
+                    aStarPath = astar.path;
                     for (int i = 0; i < maxX; i++)
                     {
                         for (int j = 0; j < maxY; j++)

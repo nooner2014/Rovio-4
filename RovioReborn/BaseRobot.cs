@@ -25,7 +25,7 @@ namespace Rovio
         protected System.Threading.Thread threadCameraImage;
         public string direction = "Unknown";
         protected Map map;
-        public double cumulativeAngle = 0;
+        public float cumulativeAngle = 0;
         protected List<int> keys = new List<int>();
         public Object mapLock = new Object();
 
